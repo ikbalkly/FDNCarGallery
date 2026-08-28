@@ -44,6 +44,7 @@ public class SecurityService {
 
     }
 
+    // mevcut employee bulma
     public BaseEmployee getCurrentEmployee() {
         UserAccount currentUser = getUserAccount();
         if (currentUser.getEmployee() == null) {
@@ -52,6 +53,7 @@ public class SecurityService {
         return currentUser.getEmployee();
     }
 
+    // şubeye erişimi kontrol etme
     public void checkBranchAccess(Long branchId) {
         if (isSuperAdmin()) {
             return;
