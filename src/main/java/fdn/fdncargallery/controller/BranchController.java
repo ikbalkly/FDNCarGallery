@@ -18,7 +18,7 @@ import java.util.List;
 @RequestMapping("/api/branches")
 @RequiredArgsConstructor
 
-@PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+@PreAuthorize("hasAuthority('SUPER_ADMIN')")
 public class BranchController implements IBranchController {
 
     private final IBranchService branchService;
@@ -30,20 +30,20 @@ public class BranchController implements IBranchController {
     }
 
     @PutMapping("/update_branch/{id}")
-    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN')")
     public ResponseEntity<BranchResponseDto> updateBranch(@Valid @RequestBody UpdateBranchRequestDto updateBranchRequestDto,
                                                           @PathVariable Long id) {
         return ResponseEntity.ok(branchService.updateBranch(updateBranchRequestDto, id));
     }
 
     @GetMapping("/list_branch/{id}")
-    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
     public ResponseEntity<BranchResponseDto> findBranchById(@PathVariable Long id) {
         return ResponseEntity.ok(branchService.findBranchById(id));
     }
 
     @GetMapping("/list_branch")
-    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
     public ResponseEntity<List<BranchResponseDto>> findAllBranches() {
         return ResponseEntity.ok(branchService.findAllBranches());
     }

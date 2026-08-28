@@ -122,7 +122,7 @@ public class ManagerService implements IManagerService {
 
         // Hem müdürün MEVCUT şubesi hem ATANACAĞI şube erişim alanında olmalı;
         // aksi halde şube admini kendi müdürünü başka şubeye kaydeder.
-        // Şimdilik sadece SYSTEM_ADMIN
+        // Şimdilik sadece SUPER_ADMIN
         securityService.checkBranchAccess(existingManager.getBranch() != null ? existingManager.getBranch().getId() : null);
         securityService.checkBranchAccess(updateManagerRequestDto.getBranchId());
 
@@ -171,7 +171,7 @@ public class ManagerService implements IManagerService {
     @Transactional
     @Override
     public List<ManagerResponseDto> findAllManagers() {
-        // SYSTEM_ADMIN tüm aktif müdürleri; ADMIN ve MANAGER yalnızca kendi
+        // SUPER_ADMIN tüm aktif müdürleri; ADMIN ve MANAGER yalnızca kendi
         // şubesindekileri görür.
         List<Manager> managers = securityService.isSuperAdmin()
                 ? managerRepository.findAllByActiveTrue()

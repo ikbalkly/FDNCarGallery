@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/managers")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN')")
+@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN')")
 public class ManagerController implements IManagerController {
 
     private final IManagerService managerService;
@@ -35,13 +35,13 @@ public class ManagerController implements IManagerController {
     }
 
     @GetMapping("/list_manager/{id}")
-    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
     public ResponseEntity<ManagerResponseDto> findManagerById(@PathVariable Long id) {
         return ResponseEntity.ok(managerService.findManagerById(id));
     }
 
     @GetMapping("/list_manager")
-    @PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
     public ResponseEntity<List<ManagerResponseDto>> findAllManagers() {
         return ResponseEntity.ok(managerService.findAllManagers());
     }

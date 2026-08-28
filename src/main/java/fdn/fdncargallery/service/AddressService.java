@@ -120,9 +120,9 @@ public class AddressService implements IAddressService {
 
     /**
      * Adres yetki kapısı. Adres bir şubeye aitse o şubenin erişim kuralı uygulanır;
-     * muafiyet SADECE SYSTEM_ADMIN'e, BRANCH_ADMIN ve MANAGER kendi şubesine kilitli.
+     * muafiyet SADECE SUPER_ADMIN'e, BRANCH_ADMIN ve MANAGER kendi şubesine kilitli.
      * Adres bir şubeye ait değilse (personel ya da müşteri adresi) branchId null
-     * kalır ve checkBranchAccess null'ı yalnızca SYSTEM_ADMIN'e geçirir.
+     * kalır ve checkBranchAccess null'ı yalnızca SUPER_ADMIN'e geçirir.
      */
     private void checkAddressAccess(Long addressId) {
         Long addressBranchId = branchRepository.findByAddressId(addressId)
@@ -131,7 +131,7 @@ public class AddressService implements IAddressService {
         securityService.checkBranchAccess(addressBranchId);
     }
 
-    /** Şube bağlamı olmayan işlemler için: yalnızca SYSTEM_ADMIN geçebilir. */
+    /** Şube bağlamı olmayan işlemler için: yalnızca SUPER_ADMIN geçebilir. */
     private void requireSystemAdmin(String message) {
         if (!securityService.isSuperAdmin()) {
             throw new BaseException(new ErrorMessage(MessageType.UNAUTHORIZED, message));

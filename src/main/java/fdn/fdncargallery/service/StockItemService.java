@@ -113,7 +113,7 @@ public class StockItemService implements IStockItemService {
 
         // branchId opsiyonel. Create'ten FARKLI olarak varsayılan "kendi şubem"
         // değil, "aracın bulunduğu şube": burada boş bırakmak "şubeyi değiştirme"
-        // demektir. SYSTEM_ADMIN'de "kendi şubem" varsayımı aracı sessizce
+        // demektir. SUPER_ADMIN'de "kendi şubem" varsayımı aracı sessizce
         // IT Merkez'e taşırdı; bu varsayılan herkes için doğru çalışıyor.
         Long targetBranchId = updateStockItemRequestDto.getBranchId() != null
                 ? updateStockItemRequestDto.getBranchId()
@@ -178,7 +178,7 @@ public class StockItemService implements IStockItemService {
     @Override
     public List<StockItemResponseDto> findAllStockItems() {
 
-        // SYSTEM_ADMIN tüm stoğu; BRANCH_ADMIN ve MANAGER yalnızca kendi şubesininkini görür.
+        // SUPER_ADMIN tüm stoğu; BRANCH_ADMIN ve MANAGER yalnızca kendi şubesininkini görür.
         List<StockItem> stockItems = securityService.isSuperAdmin()
                 ? stockItemRepository.findAll()
                 : stockItemRepository.findAllByBranchId(securityService.getCurrentBranchId());

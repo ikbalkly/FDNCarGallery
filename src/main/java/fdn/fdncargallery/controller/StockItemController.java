@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/stock-items")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('SYSTEM_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
+@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
 public class StockItemController implements IStockItemController {
 
     private final IStockItemService stockItemService;
