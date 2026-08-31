@@ -1,18 +1,18 @@
 package fdn.fdncargallery.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Embeddable
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "address")
-public class Address extends BaseEntity {
+public class Address {
 
     @Column(nullable = false)
     private String city;

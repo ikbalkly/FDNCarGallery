@@ -20,6 +20,6 @@ public interface IManagerService {
     void deleteManager(Long id);
 
     // Diğer servislerin (ör. BranchService) DTO'ya çevirmeden entity'ye
-    // ulaşabilmesi için; IAddressService.getAddressEntityById ile aynı desen.
+    // ulaşabilmesi için; IBranchService.getBranchEntityById ile aynı desen.
     Manager getManagerEntityById(Long id);
 }

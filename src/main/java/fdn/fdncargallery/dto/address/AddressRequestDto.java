@@ -1,6 +1,5 @@
 package fdn.fdncargallery.dto.address;
 
-import fdn.fdncargallery.dto.BaseEntityResponseDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

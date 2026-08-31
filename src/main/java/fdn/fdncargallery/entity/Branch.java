@@ -17,8 +17,8 @@ public class Branch extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String branchName;
 
-    // bir adreste bir şube olabilir
-    @OneToOne(cascade = CascadeType.ALL)
+    // adres -> şube satırına gömülür, ayrı tablo yok
+    @Embedded
     private Address address;
 
     // bir şubede 1 müdür olabilir
