@@ -1,6 +1,5 @@
 package fdn.fdncargallery.dto.manager;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import fdn.fdncargallery.dto.employee.EmployeeResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;

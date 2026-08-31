@@ -2,7 +2,6 @@ package fdn.fdncargallery.service;
 
 import fdn.fdncargallery.dto.vehicle.UpdateVehicleRequestDto;
 import fdn.fdncargallery.dto.vehicle.VehicleResponseDto;
-import fdn.fdncargallery.entity.StockItem;
 import fdn.fdncargallery.entity.Vehicle;
 import fdn.fdncargallery.enums.CarStatus;
 import fdn.fdncargallery.exception.BaseException;
