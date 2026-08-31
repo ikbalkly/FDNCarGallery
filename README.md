@@ -307,6 +307,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Merkezî hata yönetimi ve hata kodu sözlüğü
 - [x] Otomatik kurumsal kullanıcı adı üretimi
 - [x] İlk kurulum seeder'ı
+- [x] Email Servisi Entegrasyonu
 
 ### Devam eden / planlanan
 
@@ -315,7 +316,6 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [ ] **Araç alım (CarPurchase)** akışı — müşteriden alım, stok kalemi oluşturma
 - [ ] **Araç satış (SoldCar)** akışı — prim oranının satış anında dondurulması, müdür indirim limiti
 - [ ] **Bakım (CarMaintenance)** ve **ekspertiz (ExpertReport)** modülleri
-- [ ] Geçici şifrenin API cevabı yerine **e-posta ile** gönderilmesi (SMTP bağımlılığı eklendi, servis yazılacak)
 - [ ] Kalıtım stratejisinin `TABLE_PER_CLASS` → `JOINED` olarak değiştirilmesi
 - [ ] Veritabanı bağlantı bilgilerinin ortam değişkenlerine taşınması
 - [ ] Listeleme uçlarına sayfalama, sıralama ve filtreleme
