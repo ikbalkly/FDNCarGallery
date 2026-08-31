@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "user_accounts")
-public class  UserAccount extends BaseEntity implements UserDetails {
+public class UserAccount extends BaseEntity implements UserDetails {
 
     // kullanıcı adı
     @Column(nullable = false, unique = true, updatable = false)
@@ -43,7 +43,7 @@ public class  UserAccount extends BaseEntity implements UserDetails {
     private boolean isFirstLogin = true;
 
     // sistemde aktif olan kişinin bilgileri
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false)
     private BaseEmployee employee;
 
@@ -54,12 +54,12 @@ public class  UserAccount extends BaseEntity implements UserDetails {
 
     @Override
     public String getPassword() {
-        return this.password; // Kesinlikle kendi field'ını dönmeli!
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return this.username; // Kesinlikle kendi field'ını dönmeli!
+        return this.username;
     }
 
     @Override

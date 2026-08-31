@@ -96,10 +96,10 @@ public class BranchAdminService implements IBranchAdminService {
         userAccount.setPassword(passwordEncoder.encode(temporaryPassword));
         userAccount.setRole(Role.BRANCH_ADMIN);
         userAccount.setFirstLogin(true);
-        userAccount.setEmployee(branchAdmin);
+        SystemAdmin savedBranchAdmin = systemAdminRepository.save(branchAdmin);
+        userAccount.setEmployee(savedBranchAdmin);
 
         UserAccount savedUserAccount = userAccountRepository.saveAndFlush(userAccount);
-        SystemAdmin savedBranchAdmin = (SystemAdmin) savedUserAccount.getEmployee();
         savedBranchAdmin.setUserAccount(savedUserAccount);
 
         log.info("Yeni şube yöneticisi oluşturuldu. id: {}, şube: {}", savedBranchAdmin.getId(), branch.getBranchName());

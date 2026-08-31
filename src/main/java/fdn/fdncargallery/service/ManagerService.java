@@ -98,10 +98,10 @@ public class ManagerService implements IManagerService {
         userAccount.setFirstLogin(true);
         userAccount.setUsername(username);
         userAccount.setRole(Role.MANAGER);
-        userAccount.setEmployee(manager);
+        Manager savedManager = managerRepository.save(manager);
+        userAccount.setEmployee(savedManager);
 
         UserAccount savedUserAccount = userAccountRepository.saveAndFlush(userAccount);
-        Manager savedManager = (Manager) savedUserAccount.getEmployee();
 
         savedManager.setUserAccount(savedUserAccount);
 

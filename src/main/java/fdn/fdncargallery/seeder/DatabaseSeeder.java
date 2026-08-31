@@ -6,6 +6,7 @@ import fdn.fdncargallery.entity.SystemAdmin;
 import fdn.fdncargallery.entity.UserAccount;
 import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.repository.IBranchRepository;
+import fdn.fdncargallery.repository.ISystemAdminRepository;
 import fdn.fdncargallery.repository.IUserAccountRepository;
 import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private static final String BRANCH_ADMIN_EMAIL = "sube.admin@fdncargallery.com";
 
     private final IUserAccountRepository userAccountRepository;
+    private final ISystemAdminRepository systemAdminRepository;
     private final IBranchRepository branchRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsernameGenerator usernameGenerator;
@@ -72,13 +74,15 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         String password = requiredPassword(configuredAdminPassword, "FDN_ADMIN_PASSWORD");
 
+        SystemAdmin savedSuperAdmin = systemAdminRepository.save(superAdmin);
+
         UserAccount account = new UserAccount();
         account.setUsername(username);
         account.setEmail(SYSTEM_ADMIN_EMAIL);
         account.setPassword(passwordEncoder.encode(password));
         account.setRole(Role.SUPER_ADMIN);
         account.setFirstLogin(false);
-        account.setEmployee(superAdmin);
+        account.setEmployee(savedSuperAdmin);
         userAccountRepository.save(account);
 
         log.info("Sistem Yöneticisi kuruldu. Şube: {}, Username: {}", savedBranch.getBranchName(), username);
@@ -105,13 +109,15 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         String temporaryPassword = requiredPassword(configuredBranchAdminPassword, "FDN_BRANCH_ADMIN_PASSWORD");
 
+        SystemAdmin savedBranchAdmin = systemAdminRepository.save(branchAdmin);
+
         UserAccount account = new UserAccount();
         account.setUsername(username);
         account.setEmail(BRANCH_ADMIN_EMAIL);
         account.setPassword(passwordEncoder.encode(temporaryPassword));
         account.setRole(Role.BRANCH_ADMIN);
         account.setFirstLogin(true);
-        account.setEmployee(branchAdmin);
+        account.setEmployee(savedBranchAdmin);
         userAccountRepository.save(account);
         
         log.info("Şube Yöneticisi kuruldu. Şube: {}, Username: {}", savedBranch.getBranchName(), username);
