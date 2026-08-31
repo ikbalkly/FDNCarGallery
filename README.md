@@ -307,7 +307,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Merkezî hata yönetimi ve hata kodu sözlüğü
 - [x] Otomatik kurumsal kullanıcı adı üretimi
 - [x] İlk kurulum seeder'ı
-- [x] Email Servisi Entegrasyonu
+- [x] Email gönderme servisi entegrasyonu
 
 ### Devam eden / planlanan
 
