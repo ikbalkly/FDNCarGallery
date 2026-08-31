@@ -13,7 +13,7 @@
 
 > **Bu proje aktif olarak geliştirilmektedir. Henüz tamamlanmış bir sürüm yoktur.**
 >
-> - Şu an **kimlik doğrulama, şube, şube yöneticisi, müdür ve araç stoğu** modülleri çalışır durumda.
+> - Şu an **kimlik doğrulama, şube, şube yöneticisi, müdür ve araç stoğu** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor.
 > - Müşteri, alım, satış, bakım ve ekspertiz modüllerinin **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
 > - API sözleşmeleri (endpoint isimleri, request/response alanları) geliştirme sürecinde **değişebilir**.
 > - Ayrıntılı durum için aşağıdaki [Yol Haritası](#-yol-haritası) bölümüne bakabilirsiniz.
@@ -157,7 +157,8 @@ Uygulama; JWT anahtarı ve kurulum şifreleri tanımlı değilse **bilinçli ola
 | `FDN_JWT_SECRET` | Base64 kodlanmış HMAC-SHA256 imzalama anahtarı (zorunlu) |
 | `FDN_ADMIN_PASSWORD` | İlk kurulumda oluşturulan sistem yöneticisi şifresi (zorunlu) |
 | `FDN_BRANCH_ADMIN_PASSWORD` | İlk kurulumda oluşturulan şube yöneticisinin geçici şifresi (zorunlu) |
-| `SPRING_MAIL_USERNAME` / `SPRING_MAIL_PASSWORD` | SMTP bilgileri (opsiyonel, e-posta modülü henüz aktif değil) |
+| `SPRING_MAIL_USERNAME` / `SPRING_MAIL_PASSWORD` | SMTP hesabı ve şifresi — yeni personelin geçici şifresi bu hesaptan gönderilir |
+| `FDN_MAIL_FROM` | Gönderen adresi (opsiyonel; verilmezse `SPRING_MAIL_USERNAME` kullanılır) |
 
 ```bash
 export FDN_JWT_SECRET="$(openssl rand -base64 32)"
