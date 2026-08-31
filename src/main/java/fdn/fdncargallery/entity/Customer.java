@@ -39,7 +39,7 @@ public class Customer extends BaseEntity {
     // email
     private String email;
 
-    // adres
-    @OneToOne(cascade = CascadeType.ALL)
+    // adres -> müşteri satırına gömülür, ayrı tablo yok
+    @Embedded
     private Address address;
 }

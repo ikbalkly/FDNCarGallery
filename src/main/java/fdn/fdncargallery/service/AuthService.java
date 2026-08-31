@@ -36,7 +36,7 @@ public class AuthService implements IAuthService {
     private final PasswordEncoder passwordEncoder;
 
     /*
-    * Giriş yapma meetodu
+    * Giriş yapma metodu
     * request'den gelen username ve password doğrulanır
     *
     * */

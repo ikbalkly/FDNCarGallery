@@ -1,7 +1,7 @@
 package fdn.fdncargallery.entity;
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
@@ -9,6 +9,6 @@ import lombok.*;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-@Table(name = "system_admins")
+@DiscriminatorValue("ADMINS")
 public class SystemAdmin extends BaseEmployee {
 }
