@@ -13,7 +13,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Table(name = "employees")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "employee_type", discriminatorType = DiscriminatorType.STRING, length = 50)
 public abstract class BaseEmployee extends BaseEntity {
 
     // ad
@@ -40,9 +42,8 @@ public abstract class BaseEmployee extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 
-    // adres
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(nullable = false)
+    // adres -> personel satırına gömülür, ayrı tablo yok
+    @Embedded
     private Address address;
 
     // birçok employee tek bir şubede çalışabilir
