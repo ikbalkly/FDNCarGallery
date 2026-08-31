@@ -18,6 +18,4 @@ public class ManagerResponseDto extends EmployeeResponseDto {
     private BigDecimal branchMonthlySalesTarget;
     private BigDecimal managementBonus;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String temporaryPassword;
 }

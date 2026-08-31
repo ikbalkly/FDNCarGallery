@@ -55,18 +55,22 @@ public class VehicleService implements IVehicleService {
         return vehicleMapper.toResponse(vehicle);
     }
 
+    // vehicle repo'da gönderilen id ile ilgili kaydı bulup return ediyor
     @Override
     public Vehicle getVehicleEntityById(Long id) {
         return vehicleRepository.findById(id)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.VEHICLE_NOT_FOUND, id.toString())));
     }
 
+    // vehicle'ın kullanıcı tarafından görüntülenip görüntülenemeyeceğini şube (branch) bazlı yetkiye göre kontrol ediyor.
     private void checkVehicleAccess(Long vehicleId) {
 
+        // Verilen vehicleId'ye ait, durumu SOLD (satılmış) olmayan ilk stok kaydını arıyor. Yani "bu araç şu an hangi şubenin stoğunda duruyor?" sorusunun cevabını arıyor
         Long holdingBranchId = stockItemRepository.findFirstByVehicleIdAndStatusNot(vehicleId, CarStatus.SOLD)
+                //Kayıt bulunduysa, o stok kaydının bağlı olduğu şubenin ID'sini alıyor. findFirst... bir Optional döndürdüğü için map ile içeriye giriliyor.
                 .map(stockItem -> stockItem.getBranch().getId())
                 .orElse(null);
-
+        // Giriş yapmış kullanıcının o şubeye erişim yetkisi olup olmadığını kontrol ediyor
         securityService.checkBranchAccess(holdingBranchId);
     }
 }

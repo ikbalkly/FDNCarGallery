@@ -26,7 +26,6 @@ public interface IBranchAdminMapper {
     @Mapping(target = "email", source = "userAccount.email")
     @Mapping(target = "role", source = "userAccount.role")
     @Mapping(target = "firstLogin", source = "userAccount.firstLogin")
-    @Mapping(target = "temporaryPassword", ignore = true)
     BranchAdminResponseDto toResponse(SystemAdmin branchAdmin);
 
     @Mapping(target = "id", ignore = true)

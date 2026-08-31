@@ -54,7 +54,7 @@ public class StockItemService implements IStockItemService {
     @Override
     public StockItemResponseDto createStockItem(CreateStockItemRequestDto createStockItemRequestDto) {
 
-        // branchId opsiyonel: şube personeli göndermezse kendi şubesi kullanılır.
+        // branchId : şube personeli göndermezse kendi şubesi kullanılır.
         Long targetBranchId = resolveTargetBranchId(createStockItemRequestDto.getBranchId());
 
         // Şube admini ve müdür yalnızca kendi şubesine araç girişi yapabilir.
@@ -64,8 +64,8 @@ public class StockItemService implements IStockItemService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND,
                         targetBranchId.toString())));
 
-        // Locale.ROOT şart: Türkçe locale'de "i".toUpperCase() "İ" üretir ve aynı
-        // VIN iki farklı metne dönüşürdü. UsernameGeneratorUtils ile aynı gerekçe.
+        // Türkçe locale'de "i".toUpperCase() "İ" üretir ve aynı
+        // VIN iki farklı metne dönüşürdü.
         String vin = createStockItemRequestDto.getVehicle().getVin().trim().toUpperCase(Locale.ROOT);
 
         // yeni Vehicle kaydetmeden
@@ -73,7 +73,6 @@ public class StockItemService implements IStockItemService {
         // Plaka entity'de bilerek unique DEĞİL (aynı plaka farklı dönemlerde
         // farklı kalemlerde görünebilir), bu yüzden tekilliği burada koruyoruz.
         // SOLD dışındaki her durum "hâlâ bizde" demek.
-
 
         //Veritabanında bu plakaya (örn: 34ABC123) sahip ve durumu SATILDI (SOLD) OLMAYAN herhangi bir kayıt var mı?
         if (stockItemRepository.existsByPlateNumberAndStatusNot(
@@ -111,17 +110,15 @@ public class StockItemService implements IStockItemService {
 
         StockItem existingStockItem = getStockItemEntityById(id);
 
-        // branchId opsiyonel. Create'ten FARKLI olarak varsayılan "kendi şubem"
-        // değil, "aracın bulunduğu şube": burada boş bırakmak "şubeyi değiştirme"
-        // demektir. SUPER_ADMIN'de "kendi şubem" varsayımı aracı sessizce
-        // IT Merkez'e taşırdı; bu varsayılan herkes için doğru çalışıyor.
+        // branchId : Create'ten FARKLI olarak varsayılan "kendi şubem"
+        // değil, "aracın bulunduğu şube": burada boş bırakmak "şubeyi değiştirme" demektir.
+
         Long targetBranchId = updateStockItemRequestDto.getBranchId() != null
                 ? updateStockItemRequestDto.getBranchId()
                 : existingStockItem.getBranch().getId();
 
         // Hem aracın MEVCUT şubesi hem TAŞINACAĞI şube erişim alanında olmalı;
         // aksi halde şube admini kendi aracını başka şubeye kaçırabilirdi.
-        // updateManager ile aynı çift kapı.
         securityService.checkBranchAccess(existingStockItem.getBranch().getId());
         securityService.checkBranchAccess(targetBranchId);
 
@@ -131,8 +128,7 @@ public class StockItemService implements IStockItemService {
             throw new BaseException(new ErrorMessage(MessageType.SOLD_STOCK_ITEM_CANNOT_BE_MODIFIED, id.toString()));
         }
 
-        // Plaka DEĞİŞTİYSE aynı plakayla açık başka bir kayıt olmamalı. Değişmediyse
-        // sorgu hiç çalışmaz; yoksa kaydın kendi plakası kendine takılırdı.
+        // Plaka DEĞİŞTİYSE aynı plakayla açık başka bir kayıt olmamalı.
         if (!existingStockItem.getPlateNumber().equals(updateStockItemRequestDto.getPlateNumber())
                 && stockItemRepository.existsByPlateNumberAndStatusNot(
                         updateStockItemRequestDto.getPlateNumber(), CarStatus.SOLD)) {
@@ -154,8 +150,6 @@ public class StockItemService implements IStockItemService {
             existingStockItem.setBranch(newBranch);
         }
 
-        // Araç kimliği (vehicle), durum, tarihler ve girişi yapan personel
-        // DTO'da yok: hiçbiri bu uçtan değiştirilemez.
         stockItemMapper.updateStockItemFromDto(updateStockItemRequestDto, existingStockItem);
 
         StockItem updatedStockItem = stockItemRepository.save(existingStockItem);

@@ -39,6 +39,7 @@ public class BranchAdminService implements IBranchAdminService {
     private final PasswordEncoder passwordEncoder;
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
+    private final MailService mailService;
 
     /*
      * Oluşturma akışı:
@@ -103,9 +104,8 @@ public class BranchAdminService implements IBranchAdminService {
 
         log.info("Yeni şube yöneticisi oluşturuldu. id: {}, şube: {}", savedBranchAdmin.getId(), branch.getBranchName());
 
-        BranchAdminResponseDto response = branchAdminMapper.toResponse(savedBranchAdmin);
-        response.setTemporaryPassword(temporaryPassword);
-        return response;
+        mailService.sendTemporaryPassword(savedUserAccount.getEmail(), username, temporaryPassword);
+        return branchAdminMapper.toResponse(savedBranchAdmin);
     }
 
     @Transactional

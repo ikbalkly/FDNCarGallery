@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@AllArgsConstructor
 @NoArgsConstructor
 public class BranchAdminResponseDto extends EmployeeResponseDto {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String temporaryPassword;
 }

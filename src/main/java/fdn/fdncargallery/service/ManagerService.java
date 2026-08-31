@@ -39,6 +39,7 @@ public class ManagerService implements IManagerService {
     private final PasswordEncoder passwordEncoder;
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
+    private final MailService mailService;
 
     /*
      * Müdür oluşturma akışı:
@@ -108,9 +109,8 @@ public class ManagerService implements IManagerService {
         branchRepository.save(branch);
 
         log.info("Yeni müdür oluşturuldu ve şubeye atandı. id: {}, şube: {}", savedManager.getId(), branch.getBranchName());
-        ManagerResponseDto response = managerMapper.toResponse(savedManager);
-        response.setTemporaryPassword(temporaryPassword);
-        return response;
+        mailService.sendTemporaryPassword(savedUserAccount.getEmail(), username, temporaryPassword);
+        return managerMapper.toResponse(savedManager);
     }
 
     @Transactional
