@@ -87,8 +87,7 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @JoinColumn(nullable = false)
     private Branch branch;
 
-    // mapper, istemci tarih göndermediğinde alan varsayılanını null ile ezer;
-    // kayıt anında hala boşsa işe giriş bugün kabul edilir
+   // null gelirse, günün tarihini setler
     @PrePersist
     private void applyHireDateDefault() {
         if (hireDate == null) {
@@ -96,15 +95,11 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         }
     }
 
-    // personelin rolü tek yetkisidir -> SUPER_ADMIN, BRANCH_ADMIN, MANAGER...
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    // pasife alınan personel sisteme giremez.
-    // UserDetails.isEnabled() varsayılanı true döndüğü için bu override şart:
-    // olmazsa active=false yapılan personel giriş yapmaya devam eder.
     @Override
     public boolean isEnabled() {
         return active;

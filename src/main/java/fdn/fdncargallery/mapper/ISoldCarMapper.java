@@ -10,7 +10,6 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface ISoldCarMapper {
 
-    // --- 1. DTO'dan Entity'ye ---
     // İlişkisel nesneler, satış tarihi ve prim oranı servis katmanında set edilir.
     // commissionRate özellikle istemciden ALINMAZ: satış anındaki oran SalesRep'ten kopyalanır.
     @Mapping(target = "id", ignore = true)
@@ -22,8 +21,6 @@ public interface ISoldCarMapper {
     @Mapping(target = "saleDate", ignore = true)
     @Mapping(target = "commissionRate", ignore = true)
     SoldCar toEntity(CreateSoldCarRequestDto request);
-
-    // --- 2. Entity'den Response'a ---
 
     // Stok kalemi ve araç bilgileri
     @Mapping(target = "stockItemId", source = "stockItem.id")
