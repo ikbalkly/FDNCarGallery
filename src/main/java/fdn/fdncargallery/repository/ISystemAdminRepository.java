@@ -15,7 +15,7 @@ public interface ISystemAdminRepository extends JpaRepository<SystemAdmin, Long>
     @Query("""
             SELECT sa FROM SystemAdmin sa
             WHERE sa.active = true
-              AND sa.userAccount.role = :role
+              AND sa.role = :role
             """)
     List<SystemAdmin> findAllActiveByRole(@Param("role") Role role);
 
@@ -23,7 +23,7 @@ public interface ISystemAdminRepository extends JpaRepository<SystemAdmin, Long>
             SELECT sa FROM SystemAdmin sa
             WHERE sa.active = true
               AND sa.branch.id = :branchId
-              AND sa.userAccount.role = :role
+              AND sa.role = :role
             """)
     List<SystemAdmin> findAllActiveByRoleAndBranch(@Param("role") Role role, @Param("branchId") Long branchId);
 
@@ -31,7 +31,7 @@ public interface ISystemAdminRepository extends JpaRepository<SystemAdmin, Long>
             SELECT COUNT(sa) > 0 FROM SystemAdmin sa
             WHERE sa.active = true
               AND sa.branch.id = :branchId
-              AND sa.userAccount.role = :role
+              AND sa.role = :role
             """)
     boolean existsActiveByRoleAndBranch(@Param("role") Role role, @Param("branchId") Long branchId);
 }

@@ -3,9 +3,9 @@ package fdn.fdncargallery.service;
 import fdn.fdncargallery.dto.manager.CreateManagerRequestDto;
 import fdn.fdncargallery.dto.manager.ManagerResponseDto;
 import fdn.fdncargallery.dto.manager.UpdateManagerRequestDto;
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.Branch;
 import fdn.fdncargallery.entity.Manager;
-import fdn.fdncargallery.entity.UserAccount;
 import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
@@ -14,7 +14,6 @@ import fdn.fdncargallery.mapper.IManagerMapper;
 import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
 import fdn.fdncargallery.repository.IManagerRepository;
-import fdn.fdncargallery.repository.IUserAccountRepository;
 import fdn.fdncargallery.service.interfaces.IManagerService;
 import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
@@ -35,7 +34,6 @@ public class ManagerService implements IManagerService {
     private final IManagerMapper managerMapper;
     private final IBranchRepository branchRepository;
     private final IEmployeeRepository employeeRepository;
-    private final IUserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
@@ -47,7 +45,7 @@ public class ManagerService implements IManagerService {
      * 2) şube boşta mı kontrol et -> bir şubede yalnızca bir müdür olabilir
      * 3) kullanıcı adı / e-posta başkası tarafından alınmış mı kontrol et
      * 4) DTO'yu Manager entity'sine çevir, şubeyi DB'den gelen nesneyle set et
-     * 5) UserAccount'u kur, şifreyi encode et, rolü SUNUCU tarafında MANAGER yap
+     * 5) kimlik alanlarını set et, şifreyi encode et, rolü SUNUCU tarafında MANAGER yap
      * 6) tek save ile kaydet -> cascade zinciri Manager ve Address'i de kaydeder
      * 7) müdürü şubeye ATA -> işlem tek çağrıda tamamlansın
      */
@@ -68,7 +66,7 @@ public class ManagerService implements IManagerService {
         }
 
         // aynı maille ikinci bir kayıt açılmasın diye
-        if (userAccountRepository.existsByEmail(createManagerRequestDto.getEmail())) {
+        if (employeeRepository.existsByEmail(createManagerRequestDto.getEmail())) {
             throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, createManagerRequestDto.getEmail()));
         }
 
@@ -91,25 +89,19 @@ public class ManagerService implements IManagerService {
 
         String temporaryPassword = UUID.randomUUID().toString();
 
-        // yeni bir kullanıcı hesabı oluşturup, dataları setleniyor
-        UserAccount userAccount = new UserAccount();
-        userAccount.setEmail(createManagerRequestDto.getEmail());
-        userAccount.setPassword(passwordEncoder.encode(temporaryPassword));
-        userAccount.setFirstLogin(true);
-        userAccount.setUsername(username);
-        userAccount.setRole(Role.MANAGER);
+        // e-posta mapper tarafından DTO'dan geliyor; geri kalan kimlik alanları sunucuda üretilir
+        manager.setPassword(passwordEncoder.encode(temporaryPassword));
+        manager.setFirstLogin(true);
+        manager.setUsername(username);
+        manager.setRole(Role.MANAGER);
+
         Manager savedManager = managerRepository.save(manager);
-        userAccount.setEmployee(savedManager);
-
-        UserAccount savedUserAccount = userAccountRepository.saveAndFlush(userAccount);
-
-        savedManager.setUserAccount(savedUserAccount);
 
         branch.setManager(savedManager);
         branchRepository.save(branch);
 
         log.info("Yeni müdür oluşturuldu ve şubeye atandı. id: {}, şube: {}", savedManager.getId(), branch.getBranchName());
-        mailService.sendTemporaryPassword(savedUserAccount.getEmail(), username, temporaryPassword);
+        mailService.sendTemporaryPassword(savedManager.getEmail(), username, temporaryPassword);
         return managerMapper.toResponse(savedManager);
     }
 
@@ -159,9 +151,9 @@ public class ManagerService implements IManagerService {
         Manager manager = getManagerEntityById(id);
         securityService.checkBranchAccess(manager.getBranch() != null ? manager.getBranch().getId() : null);
 
-        UserAccount currentUser = securityService.getUserAccount();
+        BaseEmployee currentUser = securityService.getCurrentEmployee();
         if (currentUser.getRole() == Role.MANAGER
-                && !manager.getId().equals(currentUser.getEmployee().getId())) {
+                && !manager.getId().equals(currentUser.getId())) {
             throw new BaseException(new ErrorMessage(MessageType.UNAUTHORIZED, "Sadece kendi bilgilerinizi görüntüleyebilirsiniz."));
         }
 

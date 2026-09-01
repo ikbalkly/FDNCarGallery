@@ -3,9 +3,9 @@ package fdn.fdncargallery.service;
 import fdn.fdncargallery.dto.branchAdmin.BranchAdminResponseDto;
 import fdn.fdncargallery.dto.branchAdmin.CreateBranchAdminRequestDto;
 import fdn.fdncargallery.dto.branchAdmin.UpdateBranchAdminRequestDto;
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.Branch;
 import fdn.fdncargallery.entity.SystemAdmin;
-import fdn.fdncargallery.entity.UserAccount;
 import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
@@ -14,7 +14,6 @@ import fdn.fdncargallery.mapper.IBranchAdminMapper;
 import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
 import fdn.fdncargallery.repository.ISystemAdminRepository;
-import fdn.fdncargallery.repository.IUserAccountRepository;
 import fdn.fdncargallery.service.interfaces.IBranchAdminService;
 import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
@@ -35,7 +34,6 @@ public class BranchAdminService implements IBranchAdminService {
     private final IBranchAdminMapper branchAdminMapper;
     private final IBranchRepository branchRepository;
     private final IEmployeeRepository employeeRepository;
-    private final IUserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
@@ -47,7 +45,7 @@ public class BranchAdminService implements IBranchAdminService {
      * 2) şubenin zaten aktif bir yöneticisi var mı -> şube başına tek yönetici
      * 3) e-posta başkasında mı?
      * 4) tc hiçbir personelde yok mu?
-     * 5) entity + UserAccount kur, rolü  BRANCH_ADMIN yap
+     * 5) entity'yi kur, kimlik alanlarını set et, rolü BRANCH_ADMIN yap
      * 6) geçici şifre üret, ilk girişte değiştirmeyi zorunlu kıl
      */
     @Transactional
@@ -68,7 +66,7 @@ public class BranchAdminService implements IBranchAdminService {
 
         // user repoda gönderilen email kaydı var mı ?
         // varsa error fırlatı
-        if (userAccountRepository.existsByEmail(request.getEmail())) {
+        if (employeeRepository.existsByEmail(request.getEmail())) {
             throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
         }
 
@@ -90,21 +88,17 @@ public class BranchAdminService implements IBranchAdminService {
 
         String temporaryPassword = UUID.randomUUID().toString();
 
-        UserAccount userAccount = new UserAccount();
-        userAccount.setUsername(username);
-        userAccount.setEmail(request.getEmail());
-        userAccount.setPassword(passwordEncoder.encode(temporaryPassword));
-        userAccount.setRole(Role.BRANCH_ADMIN);
-        userAccount.setFirstLogin(true);
-        SystemAdmin savedBranchAdmin = systemAdminRepository.save(branchAdmin);
-        userAccount.setEmployee(savedBranchAdmin);
+        // e-posta mapper tarafından DTO'dan geliyor; geri kalan kimlik alanları sunucuda üretilir
+        branchAdmin.setUsername(username);
+        branchAdmin.setPassword(passwordEncoder.encode(temporaryPassword));
+        branchAdmin.setRole(Role.BRANCH_ADMIN);
+        branchAdmin.setFirstLogin(true);
 
-        UserAccount savedUserAccount = userAccountRepository.saveAndFlush(userAccount);
-        savedBranchAdmin.setUserAccount(savedUserAccount);
+        SystemAdmin savedBranchAdmin = systemAdminRepository.save(branchAdmin);
 
         log.info("Yeni şube yöneticisi oluşturuldu. id: {}, şube: {}", savedBranchAdmin.getId(), branch.getBranchName());
 
-        mailService.sendTemporaryPassword(savedUserAccount.getEmail(), username, temporaryPassword);
+        mailService.sendTemporaryPassword(savedBranchAdmin.getEmail(), username, temporaryPassword);
         return branchAdminMapper.toResponse(savedBranchAdmin);
     }
 
@@ -139,9 +133,9 @@ public class BranchAdminService implements IBranchAdminService {
 
         SystemAdmin branchAdmin = getBranchAdminEntityById(id);
 
-        UserAccount currentUser = securityService.getUserAccount();
+        BaseEmployee currentUser = securityService.getCurrentEmployee();
         if (currentUser.getRole() == Role.BRANCH_ADMIN
-                && !branchAdmin.getId().equals(currentUser.getEmployee().getId())) {
+                && !branchAdmin.getId().equals(currentUser.getId())) {
             throw new BaseException(new ErrorMessage(MessageType.UNAUTHORIZED, "Sadece kendi bilgilerinizi görüntüleyebilirsiniz."));
         }
 
@@ -153,9 +147,9 @@ public class BranchAdminService implements IBranchAdminService {
     public List<BranchAdminResponseDto> findAllBranchAdmins() {
 
         // Şube yöneticisi listede tek eleman görür: kendisi.
-        UserAccount currentUser = securityService.getUserAccount();
+        BaseEmployee currentUser = securityService.getCurrentEmployee();
         if (currentUser.getRole() == Role.BRANCH_ADMIN) {
-            SystemAdmin self = getBranchAdminEntityById(currentUser.getEmployee().getId());
+            SystemAdmin self = getBranchAdminEntityById(currentUser.getId());
             return List.of(branchAdminMapper.toResponse(self));
         }
 
@@ -184,7 +178,7 @@ public class BranchAdminService implements IBranchAdminService {
         SystemAdmin candidate = systemAdminRepository.findById(id)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_ADMIN_NOT_FOUND, id.toString())));
 
-        if (candidate.getUserAccount() == null || candidate.getUserAccount().getRole() != Role.BRANCH_ADMIN) {
+        if (candidate.getRole() != Role.BRANCH_ADMIN) {
             throw new BaseException(new ErrorMessage(MessageType.BRANCH_ADMIN_NOT_FOUND, id.toString()));
         }
         return candidate;
