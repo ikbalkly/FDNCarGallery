@@ -58,7 +58,7 @@ Sistemin ayırt edici tarafı **şube bazlı yetki izolasyonu**: bir şube yöne
 | Dönüşüm | MapStruct 1.6.3 |
 | Doğrulama | Jakarta Bean Validation |
 | Yardımcı | Lombok, Spring Boot DevTools |
-| E-posta | Spring Boot Starter Mail *(bağımlılık eklendi, henüz kullanılmıyor)* |
+| E-posta | Spring Boot Starter Mail (yeni personele geçici şifre gönderimi) |
 | Derleme | Maven (Maven Wrapper ile birlikte) |
 
 ---
@@ -105,15 +105,15 @@ Böylece bir aracın geçmişi kaybolmadan, her satış dönemi ayrı ayrı rapo
 
 ```
 BaseEntity (id, createTime, updateTime)
-└── BaseEmployee (ad, soyad, TC, telefon, maaş, adres, şube, aktiflik)
+└── BaseEmployee (kimlik + iletişim + adres + şube + hesap bilgileri + işe giriş/çıkış tarihi)
     ├── SystemAdmin   → SUPER_ADMIN ve BRANCH_ADMIN rolleri
     ├── Manager       → indirim yetkisi, şube satış hedefi, yönetim primi
     └── SalesRep      → prim oranı, aylık satış adedi
 ```
 
-Her personelin bir `UserAccount` kaydı vardır (`UserDetails` implementasyonu); kullanıcı adı **rol + şube + isim + tarih** formatında otomatik üretilir: `MNG_B1_IkbalK_082026`.
+Kimlik bilgileri ayrı bir hesap tablosunda değil, personelin kendi satırında tutulur: `BaseEmployee` doğrudan `UserDetails` implement eder (`username`, `password`, `email`, `role`, `isFirstLogin`) ve `isEnabled()` `active` alanına bağlıdır. Kullanıcı adı **rol + şube + isim + tarih** formatında otomatik üretilir: `MNG_B1_IkbalK_082026`.
 
-**Diğer entity'ler:** `Branch`, `Address`, `Customer`, `CarPurchase`, `SoldCar`, `CarMaintenance`, `ExpertReport`, `RefreshToken`.
+**Diğer entity'ler:** `Branch`, `Customer`, `CarPurchase`, `SoldCar`, `CarMaintenance`, `ExpertReport`, `RefreshToken`. `Address` ayrı bir tablo değil, `@Embeddable` olarak personel / müşteri / şube satırına gömülür.
 
 ---
 
@@ -309,6 +309,8 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Otomatik kurumsal kullanıcı adı üretimi
 - [x] İlk kurulum seeder'ı
 - [x] Email gönderme servisi entegrasyonu
+- [x] Kalıtımın tek tabloya indirilmesi (`SINGLE_TABLE` + `employee_type` discriminator)
+- [x] Adresin `@Embeddable` yapılması, hesap tablosunun personelle birleştirilmesi
 
 ### Devam eden / planlanan
 
@@ -317,7 +319,6 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [ ] **Araç alım (CarPurchase)** akışı — müşteriden alım, stok kalemi oluşturma
 - [ ] **Araç satış (SoldCar)** akışı — prim oranının satış anında dondurulması, müdür indirim limiti
 - [ ] **Bakım (CarMaintenance)** ve **ekspertiz (ExpertReport)** modülleri
-- [ ] Kalıtım stratejisinin `TABLE_PER_CLASS` → `JOINED` olarak değiştirilmesi
 - [ ] Veritabanı bağlantı bilgilerinin ortam değişkenlerine taşınması
 - [ ] Listeleme uçlarına sayfalama, sıralama ve filtreleme
 - [ ] Swagger / OpenAPI dokümantasyonu
