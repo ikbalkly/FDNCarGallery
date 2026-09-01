@@ -17,15 +17,16 @@ public interface IBranchAdminMapper {
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "branch", ignore = true)
-    @Mapping(target = "userAccount", ignore = true)
+    // hesap alanları sunucuda üretiliyor; çıkış tarihi kayıt anında boş
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
     SystemAdmin toEntity(CreateBranchAdminRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
     @Mapping(target = "branchName", source = "branch.branchName")
-    @Mapping(target = "username", source = "userAccount.username")
-    @Mapping(target = "email", source = "userAccount.email")
-    @Mapping(target = "role", source = "userAccount.role")
-    @Mapping(target = "firstLogin", source = "userAccount.firstLogin")
     BranchAdminResponseDto toResponse(SystemAdmin branchAdmin);
 
     @Mapping(target = "id", ignore = true)
@@ -33,8 +34,15 @@ public interface IBranchAdminMapper {
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "branch", ignore = true)
-    @Mapping(target = "userAccount", ignore = true)
     // identityNumber ignore: TC değişmez (entity'de updatable=false), update DTO'sunda bilerek yok.
     @Mapping(target = "identityNumber", ignore = true)
+    // kullanıcı adı, şifre ve rol update ile değişmez; işe giriş/çıkış tarihi de bu DTO'da yok
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "hireDate", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
     void updateBranchAdminFromDto(UpdateBranchAdminRequestDto request, @MappingTarget SystemAdmin branchAdmin);
 }

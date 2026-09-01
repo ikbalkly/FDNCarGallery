@@ -4,7 +4,7 @@ import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
 import fdn.fdncargallery.exception.MessageType;
-import fdn.fdncargallery.repository.IUserAccountRepository;
+import fdn.fdncargallery.repository.IEmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ public class UsernameGenerator {
 
     private static final int MAX_ATTEMPTS = 99;
 
-    private final IUserAccountRepository userAccountRepository;
+    private final IEmployeeRepository employeeRepository;
 
     /**
      * Kurumsal formatta, veritabanında benzersiz olduğu doğrulanmış bir kullanıcı adı döner.
@@ -24,13 +24,13 @@ public class UsernameGenerator {
 
         String base = UsernameGeneratorUtils.generateCorporateUsername(firstName, lastName, role, branchId);
 
-        if (!userAccountRepository.existsByUsername(base)) {
+        if (!employeeRepository.existsByUsername(base)) {
             return base;
         }
 
         for (int i = 2; i <= MAX_ATTEMPTS; i++) {
             String candidate = base + "_" + i;
-            if (!userAccountRepository.existsByUsername(candidate)) {
+            if (!employeeRepository.existsByUsername(candidate)) {
                 return candidate;
             }
         }

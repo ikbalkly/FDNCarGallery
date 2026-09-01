@@ -10,7 +10,6 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface ICarMaintenanceMapper {
 
-    // --- 1. DTO'dan Entity'ye ---
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createTime", ignore = true)
     @Mapping(target = "updateTime", ignore = true)

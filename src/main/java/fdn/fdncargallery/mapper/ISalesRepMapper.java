@@ -17,14 +17,15 @@ public interface ISalesRepMapper {
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "monthlySalesCount", ignore = true)
     @Mapping(target = "branch", ignore = true)
-    @Mapping(target = "userAccount", ignore = true)
+    // hesap alanları sunucuda üretiliyor; çıkış tarihi kayıt anında boş
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
     SalesRep toSalesRepEntity(CreateSalesRepRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
     @Mapping(target = "branchName", source = "branch.branchName")
-    @Mapping(target = "username", source = "userAccount.username")
-    @Mapping(target = "email", source = "userAccount.email")
-    @Mapping(target = "role", source = "userAccount.role")
-    @Mapping(target = "firstLogin", source = "userAccount.firstLogin")
     SalesRepResponseDto toSalesRepResponse(SalesRep salesRep);
 }

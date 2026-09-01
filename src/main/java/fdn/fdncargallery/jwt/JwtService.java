@@ -1,6 +1,6 @@
 package fdn.fdncargallery.jwt;
 
-import fdn.fdncargallery.entity.UserAccount;
+import fdn.fdncargallery.entity.BaseEmployee;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,17 +29,17 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(configuredSecret));
     }
 
-    public String generateToken(UserAccount userAccount) {
+    public String generateToken(BaseEmployee employee) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", userAccount.getRole().name());
-        claims.put("isFirstLogin", userAccount.isFirstLogin());
-        if (userAccount.getEmployee() != null && userAccount.getEmployee().getBranch() != null) {
-            claims.put("branchId", userAccount.getEmployee().getBranch().getId());
+        claims.put("role", employee.getRole().name());
+        claims.put("isFirstLogin", employee.isFirstLogin());
+        if (employee.getBranch() != null) {
+            claims.put("branchId", employee.getBranch().getId());
         }
 
         return Jwts
                 .builder()
-                .subject(userAccount.getUsername())
+                .subject(employee.getUsername())
                 .claims(claims)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_MS))

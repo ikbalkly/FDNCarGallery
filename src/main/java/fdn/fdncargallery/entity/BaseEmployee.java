@@ -1,12 +1,19 @@
 package fdn.fdncargallery.entity;
 
+import fdn.fdncargallery.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,7 +23,7 @@ import java.math.BigDecimal;
 @Table(name = "employees")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "employee_type", discriminatorType = DiscriminatorType.STRING, length = 50)
-public abstract class BaseEmployee extends BaseEntity {
+public abstract class BaseEmployee extends BaseEntity implements UserDetails {
 
     // ad
     @Column(nullable = false)
@@ -42,6 +49,35 @@ public abstract class BaseEmployee extends BaseEntity {
     @Column(nullable = false)
     private boolean active = true;
 
+    // işe giriş tarihi
+    @Column(nullable = false)
+    private LocalDate hireDate = LocalDate.now();
+
+    // işten çıkış tarihi
+    @Column(nullable = true)
+    private LocalDate terminationDate;
+
+    // kullanıcı adı
+    @Column(nullable = false, unique = true, updatable = false)
+    private String username;
+
+    // şifresi
+    @Column(nullable = false)
+    private String password;
+
+    // mailli -> şirket veya bireysel
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    // rolü
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    // ilk giriş kontolü -> default şifreyi değiştirmek için
+    @Column(nullable = false)
+    private boolean isFirstLogin = true;
+
     // adres -> personel satırına gömülür, ayrı tablo yok
     @Embedded
     private Address address;
@@ -51,7 +87,21 @@ public abstract class BaseEmployee extends BaseEntity {
     @JoinColumn(nullable = false)
     private Branch branch;
 
-    // kullanıcı hesabı
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "employee")
-    private UserAccount userAccount;
+   // null gelirse, günün tarihini setler
+    @PrePersist
+    private void applyHireDateDefault() {
+        if (hireDate == null) {
+            hireDate = LocalDate.now();
+        }
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return active;
+    }
 }

@@ -17,15 +17,16 @@ public interface IManagerMapper {
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "branch", ignore = true)
-    @Mapping(target = "userAccount", ignore = true)
+    // hesap alanları sunucuda üretiliyor; çıkış tarihi kayıt anında boş
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
     Manager toEntity(CreateManagerRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
     @Mapping(target = "branchName", source = "branch.branchName")
-    @Mapping(target = "username", source = "userAccount.username")
-    @Mapping(target = "email", source = "userAccount.email")
-    @Mapping(target = "role", source = "userAccount.role")
-    @Mapping(target = "firstLogin", source = "userAccount.firstLogin")
     ManagerResponseDto toResponse(Manager manager);
 
     @Mapping(target = "id", ignore = true)
@@ -33,7 +34,14 @@ public interface IManagerMapper {
     @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "branch", ignore = true)
-    @Mapping(target = "userAccount", ignore = true)
     @Mapping(target = "identityNumber", ignore = true)
+    // kullanıcı adı, şifre ve rol update ile değişmez; işe giriş/çıkış tarihi de bu DTO'da yok
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "hireDate", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
     void updateManagerFromDto(UpdateManagerRequestDto request, @MappingTarget Manager manager);
 }
