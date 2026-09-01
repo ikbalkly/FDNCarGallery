@@ -2,7 +2,7 @@ package fdn.fdncargallery.jwt;
 
 
 import fdn.fdncargallery.config.SecurityConfig;
-import fdn.fdncargallery.entity.UserAccount;
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.exception.MessageType;
 import fdn.fdncargallery.handler.ApiErrorWriter;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -54,11 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authenticationToken.setDetails(userDetails);
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                        /*
-                        * userDetailes'den gelen isFirstLogin değerini al
-                        * gönderilen isteğin yolunu al önreğin : /api/managers/list_manager
-                        * */
-                        boolean isFirstLogin = ((UserAccount) userDetails).isFirstLogin();
+                        boolean isFirstLogin = ((BaseEmployee) userDetails).isFirstLogin();
                         String requestUri = request.getRequestURI();
 
                         // eğer kişi hala isFirstLogin=true ve tıkladığı adres şifre değiştirme değilse hata fırtlat

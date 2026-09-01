@@ -1,7 +1,7 @@
 package fdn.fdncargallery.service;
 
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.RefreshToken;
-import fdn.fdncargallery.entity.UserAccount;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
 import fdn.fdncargallery.exception.MessageType;
@@ -27,10 +27,10 @@ public class RefreshTokenService implements IRefreshTokenService {
 
     @Override
     @Transactional
-    public RefreshToken createRefreshToken(UserAccount userAccount) {
+    public RefreshToken createRefreshToken(BaseEmployee employee) {
 
             RefreshToken refreshToken = new RefreshToken();
-            refreshToken.setUserAccount(userAccount);
+            refreshToken.setEmployee(employee);
             refreshToken.setRefreshToken(UUID.randomUUID().toString());
             refreshToken.setExpiryDate(Instant.now().plus(VALIDITY_DAYS, ChronoUnit.DAYS));
 
@@ -70,7 +70,7 @@ public class RefreshTokenService implements IRefreshTokenService {
     @Transactional
     public RefreshToken rotate(RefreshToken current) {
 
-        UserAccount owner = current.getUserAccount();
+        BaseEmployee owner = current.getEmployee();
         refreshTokenRepository.delete(current);
 
         RefreshToken rotated = createRefreshToken(owner);

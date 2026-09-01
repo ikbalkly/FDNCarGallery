@@ -1,11 +1,11 @@
 package fdn.fdncargallery.service.interfaces;
 
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.RefreshToken;
-import fdn.fdncargallery.entity.UserAccount;
 
 public interface IRefreshTokenService {
 
-    public RefreshToken createRefreshToken(UserAccount userAccount);
+    public RefreshToken createRefreshToken(BaseEmployee employee);
 
     /**
      * Token'ı bulur ve süresini doğrular. Süresi dolmuşsa kaydı siler ve hata

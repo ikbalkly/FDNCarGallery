@@ -1,10 +1,6 @@
 package fdn.fdncargallery.config;
 
-import fdn.fdncargallery.entity.UserAccount;
-import fdn.fdncargallery.exception.BaseException;
-import fdn.fdncargallery.exception.ErrorMessage;
-import fdn.fdncargallery.exception.MessageType;
-import fdn.fdncargallery.repository.IUserAccountRepository;
+import fdn.fdncargallery.repository.IEmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,13 +13,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
 @RequiredArgsConstructor
 @Configuration
 public class AppConfig {
 
-    private final IUserAccountRepository userRepository;
+    private final IEmployeeRepository employeeRepository;
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -39,13 +33,8 @@ public class AppConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            Optional<UserAccount> optional = userRepository.findByUsernameForAuthentication(username);
-            if (optional.isPresent()) {
-                return optional.get();
-            }
-            throw new UsernameNotFoundException(username);
-        };
+        return username -> employeeRepository.findByUsernameForAuthentication(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
     @Bean

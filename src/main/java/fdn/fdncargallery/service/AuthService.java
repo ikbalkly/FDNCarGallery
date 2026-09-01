@@ -4,13 +4,13 @@ import fdn.fdncargallery.dto.auth.AuthRequest;
 import fdn.fdncargallery.dto.auth.AuthResponse;
 import fdn.fdncargallery.dto.auth.ChangePasswordRequestDto;
 import fdn.fdncargallery.dto.auth.RefreshTokenRequestDto;
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.RefreshToken;
-import fdn.fdncargallery.entity.UserAccount;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
 import fdn.fdncargallery.exception.MessageType;
 import fdn.fdncargallery.jwt.JwtService;
-import fdn.fdncargallery.repository.IUserAccountRepository;
+import fdn.fdncargallery.repository.IEmployeeRepository;
 import fdn.fdncargallery.service.interfaces.IAuthService;
 import fdn.fdncargallery.service.interfaces.IRefreshTokenService;
 import jakarta.transaction.Transactional;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class AuthService implements IAuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final IUserAccountRepository userAccountRepository;
+    private final IEmployeeRepository employeeRepository;
     private final JwtService jwtService;
     private final IRefreshTokenService refreshTokenService;
     private final SecurityService securityService;
@@ -38,7 +38,6 @@ public class AuthService implements IAuthService {
     /*
     * Giriş yapma metodu
     * request'den gelen username ve password doğrulanır
-    *
     * */
     public AuthResponse login(AuthRequest authRequest) {
         try {
@@ -46,13 +45,13 @@ public class AuthService implements IAuthService {
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
             );
 
-            UserAccount userAccount = userAccountRepository.findByUsername(authRequest.getUsername())
+            BaseEmployee employee = employeeRepository.findByUsername(authRequest.getUsername())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, authRequest.getUsername())));
 
-            String accessToken = jwtService.generateToken(userAccount);
-            RefreshToken savedRefreshToken = refreshTokenService.createRefreshToken(userAccount);
+            String accessToken = jwtService.generateToken(employee);
+            RefreshToken savedRefreshToken = refreshTokenService.createRefreshToken(employee);
 
-            return new AuthResponse(accessToken, savedRefreshToken.getRefreshToken(), userAccount.isFirstLogin());
+            return new AuthResponse(accessToken, savedRefreshToken.getRefreshToken(), employee.isFirstLogin());
 
         } catch (DisabledException e) {
             log.warn("Pasif hesapla giriş denemesi. username: {}", authRequest.getUsername());
@@ -76,20 +75,20 @@ public class AuthService implements IAuthService {
 
         RefreshToken existing = refreshTokenService.validate(refreshTokenRequestDto.getRefreshToken());
 
-        UserAccount userAccount = existing.getUserAccount();
-        if (userAccount == null) {
-            throw new BaseException(new ErrorMessage(MessageType.INVALID_TOKEN, "Refresh token bir hesaba bağlı değil"));
+        BaseEmployee employee = existing.getEmployee();
+        if (employee == null) {
+            throw new BaseException(new ErrorMessage(MessageType.INVALID_TOKEN, "Refresh token bir personele bağlı değil"));
         }
 
-        if (!userAccount.isEnabled()) {
-            throw new BaseException(new ErrorMessage(MessageType.ACCOUNT_DISABLED, userAccount.getUsername()));
+        if (!employee.isEnabled()) {
+            throw new BaseException(new ErrorMessage(MessageType.ACCOUNT_DISABLED, employee.getUsername()));
         }
 
         RefreshToken rotated = refreshTokenService.rotate(existing);
-        String accessToken = jwtService.generateToken(userAccount);
+        String accessToken = jwtService.generateToken(employee);
 
-        log.info("Token yenilendi. username: {}", userAccount.getUsername());
-        return new AuthResponse(accessToken, rotated.getRefreshToken(), userAccount.isFirstLogin());
+        log.info("Token yenilendi. username: {}", employee.getUsername());
+        return new AuthResponse(accessToken, rotated.getRefreshToken(), employee.isFirstLogin());
     }
 
 
@@ -103,9 +102,9 @@ public class AuthService implements IAuthService {
     @Override
     public void changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
 
-        UserAccount currentUser = securityService.getUserAccount();
+        BaseEmployee currentEmployee = securityService.getCurrentEmployee();
 
-        if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), currentUser.getPassword())) {
+        if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), currentEmployee.getPassword())) {
             throw new BaseException(new ErrorMessage(MessageType.BAD_CREDENTIALS, "Mevcut şifre hatalı."));
         }
 
@@ -113,15 +112,15 @@ public class AuthService implements IAuthService {
             throw new BaseException(new ErrorMessage(MessageType.PASSWORD_CONFIRMATION_MISMATCH, null));
         }
 
-        if (passwordEncoder.matches(changePasswordRequestDto.getNewPassword(), currentUser.getPassword())) {
+        if (passwordEncoder.matches(changePasswordRequestDto.getNewPassword(), currentEmployee.getPassword())) {
             throw new BaseException(new ErrorMessage(MessageType.NEW_PASSWORD_SAME_AS_OLD, null));
         }
 
-        currentUser.setPassword(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
-        currentUser.setFirstLogin(false);
-        userAccountRepository.save(currentUser);
+        currentEmployee.setPassword(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
+        currentEmployee.setFirstLogin(false);
+        employeeRepository.save(currentEmployee);
 
-        log.info("Şifre değiştirildi. username: {}", currentUser.getUsername());
+        log.info("Şifre değiştirildi. username: {}", currentEmployee.getUsername());
     }
 
 
