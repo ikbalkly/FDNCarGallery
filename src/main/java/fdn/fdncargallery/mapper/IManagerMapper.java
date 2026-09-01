@@ -42,5 +42,6 @@ public interface IManagerMapper {
     @Mapping(target = "firstLogin", ignore = true)
     @Mapping(target = "hireDate", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
     void updateManagerFromDto(UpdateManagerRequestDto request, @MappingTarget Manager manager);
 }

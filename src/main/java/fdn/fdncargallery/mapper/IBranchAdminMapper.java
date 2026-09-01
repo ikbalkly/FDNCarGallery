@@ -42,6 +42,7 @@ public interface IBranchAdminMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "firstLogin", ignore = true)
     @Mapping(target = "hireDate", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     void updateBranchAdminFromDto(UpdateBranchAdminRequestDto request, @MappingTarget SystemAdmin branchAdmin);
 }
