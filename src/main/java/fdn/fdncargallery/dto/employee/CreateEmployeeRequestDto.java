@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -45,4 +46,6 @@ public abstract class CreateEmployeeRequestDto {
     @Email(message = "Geçerli bir e-posta adresi giriniz")
     private String email;
 
+    @PastOrPresent(message = "İşe giriş tarihi gelecekte olamaz")
+    private LocalDate hireDate;
 }

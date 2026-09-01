@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -32,6 +33,9 @@ public class EmployeeResponseDto extends BaseEntityResponseDto {
     private Role role;
     private boolean firstLogin;
     private boolean active;
+
+    private LocalDate hireDate;
+    private LocalDate terminationDate;
 
     public String getFullName() {
         return name + " " + surname;

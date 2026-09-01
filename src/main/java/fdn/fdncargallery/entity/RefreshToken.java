@@ -26,5 +26,5 @@ public class RefreshToken extends BaseEntity {
 
     // kullanıcı hesabı
     @ManyToOne(fetch = FetchType.LAZY)
-    private UserAccount userAccount;
+    private BaseEmployee employee;
 }

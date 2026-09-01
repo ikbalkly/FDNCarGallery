@@ -35,6 +35,10 @@ public abstract class UpdateEmployeeRequestDto {
     @NotNull(message = "Personelin çalışacağı şube seçilmelidir")
     private Long branchId;
 
+    @NotBlank(message = "E-posta adresi zorunludur")
+    @Email(message = "Geçerli bir e-posta adresi giriniz")
+    private String email;
+
     @Valid
     @NotNull(message = "Personel adresi zorunludur")
     private AddressRequestDto address;
