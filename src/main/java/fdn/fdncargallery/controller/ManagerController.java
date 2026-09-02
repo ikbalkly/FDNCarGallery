@@ -1,6 +1,7 @@
 package fdn.fdncargallery.controller;
 
 import fdn.fdncargallery.controller.interfaces.IManagerController;
+import fdn.fdncargallery.dto.employee.ReactivateEmployeeRequestDto;
 import fdn.fdncargallery.dto.manager.CreateManagerRequestDto;
 import fdn.fdncargallery.dto.manager.ManagerResponseDto;
 import fdn.fdncargallery.dto.manager.UpdateManagerRequestDto;
@@ -50,5 +51,11 @@ public class ManagerController implements IManagerController {
     public ResponseEntity<Void> deleteManager(@PathVariable Long id) {
         managerService.deleteManager(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/reactivate_manager/{id}")
+    public ResponseEntity<ManagerResponseDto> reactivateManager(@Valid @RequestBody ReactivateEmployeeRequestDto reactivateEmployeeRequestDto,
+                                                                @PathVariable Long id) {
+        return ResponseEntity.ok(managerService.reactivateManager(reactivateEmployeeRequestDto, id));
     }
 }

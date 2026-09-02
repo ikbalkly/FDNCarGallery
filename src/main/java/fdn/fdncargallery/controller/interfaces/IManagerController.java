@@ -1,5 +1,6 @@
 package fdn.fdncargallery.controller.interfaces;
 
+import fdn.fdncargallery.dto.employee.ReactivateEmployeeRequestDto;
 import fdn.fdncargallery.dto.manager.CreateManagerRequestDto;
 import fdn.fdncargallery.dto.manager.ManagerResponseDto;
 import fdn.fdncargallery.dto.manager.UpdateManagerRequestDto;
@@ -18,4 +19,6 @@ public interface IManagerController {
     public ResponseEntity<List<ManagerResponseDto>> findAllManagers();
 
     public ResponseEntity<Void> deleteManager(Long id);
+
+    public ResponseEntity<ManagerResponseDto> reactivateManager(ReactivateEmployeeRequestDto reactivateEmployeeRequestDto, Long id);
 }

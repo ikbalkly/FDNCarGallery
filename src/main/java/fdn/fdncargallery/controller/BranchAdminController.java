@@ -4,6 +4,7 @@ import fdn.fdncargallery.controller.interfaces.IBranchAdminController;
 import fdn.fdncargallery.dto.branchAdmin.BranchAdminResponseDto;
 import fdn.fdncargallery.dto.branchAdmin.CreateBranchAdminRequestDto;
 import fdn.fdncargallery.dto.branchAdmin.UpdateBranchAdminRequestDto;
+import fdn.fdncargallery.dto.employee.ReactivateEmployeeRequestDto;
 import fdn.fdncargallery.service.interfaces.IBranchAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,5 +51,11 @@ public class BranchAdminController implements IBranchAdminController {
     public ResponseEntity<Void> deleteBranchAdmin(@PathVariable Long id) {
         branchAdminService.deleteBranchAdmin(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/reactivate_branch_admin/{id}")
+    public ResponseEntity<BranchAdminResponseDto> reactivateBranchAdmin(@Valid @RequestBody ReactivateEmployeeRequestDto reactivateEmployeeRequestDto,
+                                                                        @PathVariable Long id) {
+        return ResponseEntity.ok(branchAdminService.reactivateBranchAdmin(reactivateEmployeeRequestDto, id));
     }
 }

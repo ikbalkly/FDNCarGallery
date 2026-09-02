@@ -48,6 +48,9 @@ public enum MessageType {
     BRANCH_ADMIN_ALREADY_ASSIGNED("5009", "Bu şubenin zaten bir yöneticisi var. Yeni yönetici atamadan önce mevcut yöneticiyi görevden almalısınız.", HttpStatus.CONFLICT),
     // Bir kişinin sistemde tek personel kaydı olabilir: aynı TC ikinci bir rolde açılamaz.
     EMPLOYEE_IDENTITY_ALREADY_EXISTS("5010", "Bu TC kimlik numarası başka bir personel kaydında kullanılıyor. Bir kişi yalnızca tek bir rolde görev yapabilir.", HttpStatus.CONFLICT),
+    // Ayrılmış personel geri dönüyor: yeni kayıt yerine mevcut kaydı yeniden aktifleştir.
+    EMPLOYEE_INACTIVE_RECORD_EXISTS("5011", "Bu TC kimlik numarasına ait pasif bir personel kaydı var. Yeni kayıt açmak yerine yeniden işe alım yapın.", HttpStatus.CONFLICT),
+    EMPLOYEE_ALREADY_ACTIVE("5012", "Bu personel zaten aktif durumda, yeniden işe alım yapılamaz.", HttpStatus.CONFLICT),
 
     // --- 6000: Bakım ve ekspertiz ---
     STOCK_ITEM_ALREADY_IN_MAINTENANCE("6000", "Bu araç şu anda aktif olarak bakımda görünmektedir, yeni bakım kaydı açılamaz.", HttpStatus.CONFLICT),
