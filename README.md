@@ -13,7 +13,7 @@
 
 > **Bu proje aktif olarak geliştirilmektedir. Henüz tamamlanmış bir sürüm yoktur.**
 >
-> - Şu an **kimlik doğrulama, şube, şube yöneticisi, müdür ve araç stoğu** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor.
+> - Şu an **kimlik doğrulama, şube, şube yöneticisi, müdür ve araç stoğu** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor, ayrılan personel yeniden işe alınabiliyor.
 > - Müşteri, alım, satış, bakım ve ekspertiz modüllerinin **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
 > - API sözleşmeleri (endpoint isimleri, request/response alanları) geliştirme sürecinde **değişebilir**.
 > - Ayrıntılı durum için aşağıdaki [Yol Haritası](#-yol-haritası) bölümüne bakabilirsiniz.
@@ -88,7 +88,8 @@ src/main/java/fdn/fdncargallery/
 
 - İstemciden gelen veriye asla doğrudan güvenilmez: stok girişini yapan personel ve şube bilgisi **token'dan** çözülür, DTO'da böyle bir alan yoktur.
 - Tüm iş kuralı ihlalleri `BaseException` + `MessageType` üzerinden tek noktadan HTTP durum koduna çevrilir.
-- Silme işlemleri personel tarafında **soft delete**'tir (`active = false`), böylece geçmiş satış ve stok kayıtları bozulmaz. Şube silme ise personel/araç varsa engellenir.
+- Silme işlemleri personel tarafında **soft delete**'tir (`active = false`, `terminationDate` damgalanır), böylece geçmiş satış ve stok kayıtları bozulmaz. Ayrılan personel geri döndüğünde yeni kayıt açılmaz: `reactivate` uçları mevcut satırı canlandırır, böylece kişinin tüm geçmişi tek personel kimliğinde kalır. Şube silme ise personel/araç varsa engellenir.
+- Kişisel veri URL'de taşınmaz: TC ile personel araması `POST` gövdesiyle yapılır, böylece kimlik numarası erişim log'larına ve hata cevaplarının `path` alanına düşmez.
 
 ---
 
@@ -235,6 +236,7 @@ Content-Type: application/json
 | `PUT` | `/update_branch_admin/{id}` | Sistem yöneticisi |
 | `GET` | `/list_branch_admin` · `/list_branch_admin/{id}` | Sistem yöneticisi, şube yöneticisi (yalnızca kendisi) |
 | `DELETE` | `/delete_branch_admin/{id}` | Sistem yöneticisi *(pasife alır)* |
+| `PUT` | `/reactivate_branch_admin/{id}` | Sistem yöneticisi *(pasif kaydı geri açar)* |
 
 ### Müdürler — `/api/managers`
 
@@ -244,6 +246,15 @@ Content-Type: application/json
 | `PUT` | `/update_manager/{id}` | Sistem yöneticisi, şube yöneticisi |
 | `GET` | `/list_manager` · `/list_manager/{id}` | Sistem yöneticisi, şube yöneticisi, müdür |
 | `DELETE` | `/delete/{id}` | Sistem yöneticisi, şube yöneticisi *(pasife alır)* |
+| `PUT` | `/reactivate_manager/{id}` | Sistem yöneticisi, şube yöneticisi *(pasif kaydı geri açar)* |
+
+### Personel (ortak) — `/api/employees`
+
+| Method | Uç | Erişim |
+|---|---|---|
+| `POST` | `/search_employee` | Sistem yöneticisi, şube yöneticisi |
+
+> TC kimlik numarasıyla **rolden bağımsız** personel araması. Ayrılmış personelin kaydını bulup yeniden işe alım için gereken `id`'yi verir; pasif kayıtlar listeleme uçlarında görünmediği için bu uç olmadan bulunamazlar. Dönen sonuç bilinçli olarak dardır: `id`, ad, soyad, rol, `active`, işe giriş/çıkış tarihi ve şube adı — maaş, adres, iletişim ve hesap bilgileri yer almaz.
 
 ### Stok Kalemleri — `/api/stock-items`
 
@@ -311,6 +322,8 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Email gönderme servisi entegrasyonu
 - [x] Kalıtımın tek tabloya indirilmesi (`SINGLE_TABLE` + `employee_type` discriminator)
 - [x] Adresin `@Embeddable` yapılması, hesap tablosunun personelle birleştirilmesi
+- [x] Ayrılan personelin yeniden işe alınması (`reactivate` uçları, `terminationDate` takibi)
+- [x] TC ile rolden bağımsız personel arama
 
 ### Devam eden / planlanan
 
