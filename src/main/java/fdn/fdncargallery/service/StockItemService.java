@@ -152,7 +152,7 @@ public class StockItemService implements IStockItemService {
 
         stockItemMapper.updateStockItemFromDto(updateStockItemRequestDto, existingStockItem);
 
-        StockItem updatedStockItem = stockItemRepository.save(existingStockItem);
+        StockItem updatedStockItem = stockItemRepository.saveAndFlush(existingStockItem);
         return stockItemMapper.toResponse(updatedStockItem);
     }
 

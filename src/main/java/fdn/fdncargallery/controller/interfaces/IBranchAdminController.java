@@ -3,6 +3,7 @@ package fdn.fdncargallery.controller.interfaces;
 import fdn.fdncargallery.dto.branchAdmin.BranchAdminResponseDto;
 import fdn.fdncargallery.dto.branchAdmin.CreateBranchAdminRequestDto;
 import fdn.fdncargallery.dto.branchAdmin.UpdateBranchAdminRequestDto;
+import fdn.fdncargallery.dto.employee.ReactivateEmployeeRequestDto;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface IBranchAdminController {
     ResponseEntity<List<BranchAdminResponseDto>> findAllBranchAdmins();
 
     ResponseEntity<Void> deleteBranchAdmin(Long id);
+
+    ResponseEntity<BranchAdminResponseDto> reactivateBranchAdmin(ReactivateEmployeeRequestDto reactivateEmployeeRequestDto, Long id);
 }

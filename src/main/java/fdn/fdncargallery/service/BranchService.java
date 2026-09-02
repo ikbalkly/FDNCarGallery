@@ -105,7 +105,7 @@ public class BranchService implements IBranchService {
         // branchName ve address yerinde güncellenir
         branchMapper.updateBranchFromDto(updateBranchRequestDto, existingBranch);
 
-        Branch updatedBranch = branchRepository.save(existingBranch);
+        Branch updatedBranch = branchRepository.saveAndFlush(existingBranch);
         return branchMapper.toResponse(updatedBranch);
     }
 

@@ -3,6 +3,7 @@ package fdn.fdncargallery.service;
 import fdn.fdncargallery.dto.branchAdmin.BranchAdminResponseDto;
 import fdn.fdncargallery.dto.branchAdmin.CreateBranchAdminRequestDto;
 import fdn.fdncargallery.dto.branchAdmin.UpdateBranchAdminRequestDto;
+import fdn.fdncargallery.dto.employee.ReactivateEmployeeRequestDto;
 import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.Branch;
 import fdn.fdncargallery.entity.SystemAdmin;
@@ -10,6 +11,7 @@ import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
 import fdn.fdncargallery.exception.MessageType;
+import fdn.fdncargallery.mapper.IAddressMapper;
 import fdn.fdncargallery.mapper.IBranchAdminMapper;
 import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +41,7 @@ public class BranchAdminService implements IBranchAdminService {
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
     private final MailService mailService;
+    private final IAddressMapper addressMapper;
 
     /*
      * Oluşturma akışı:
@@ -64,17 +68,21 @@ public class BranchAdminService implements IBranchAdminService {
             throw new BaseException(new ErrorMessage(MessageType.BRANCH_ADMIN_ALREADY_ASSIGNED, branch.getBranchName()));
         }
 
+        // TC kontrolü e-postadan ÖNCE: ayrılmış personel eski e-postasıyla geri
+        // dönerse önce "pasif kaydın var" mesajını görmeli, e-posta çakışmasını değil.
+        employeeRepository.findByIdentityNumber(request.getIdentityNumber()).ifPresent(existing -> {
+            // Bir kişi tek rolde görev yapabilir: aktif kayıt varsa ikinci kayıt açılmaz.
+            if (existing.isActive()) {
+                throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_IDENTITY_ALREADY_EXISTS, request.getIdentityNumber()));
+            }
+            // Pasif kayıt: yeni satır değil, yeniden işe alım gerekiyor. id'yi mesaja koy.
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_INACTIVE_RECORD_EXISTS, existing.getId().toString()));
+        });
+
         // user repoda gönderilen email kaydı var mı ?
         // varsa error fırlatı
         if (employeeRepository.existsByEmail(request.getEmail())) {
             throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
-        }
-
-        // employee repoda böyle bir tc kaydı var mı?
-        // Bir kişi tek rolde görev yapabilir: gönderilen  TC herhangi bir personel
-        // tablosunda varsa (müdür / danışman / yönetici) ikinci kayıt açılmaz.
-        if (employeeRepository.existsByIdentityNumber(request.getIdentityNumber())) {
-            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_IDENTITY_ALREADY_EXISTS, request.getIdentityNumber()));
         }
 
         // gelen request Branch Admin entitysine maplernir
@@ -94,7 +102,7 @@ public class BranchAdminService implements IBranchAdminService {
         branchAdmin.setRole(Role.BRANCH_ADMIN);
         branchAdmin.setFirstLogin(true);
 
-        SystemAdmin savedBranchAdmin = systemAdminRepository.save(branchAdmin);
+        SystemAdmin savedBranchAdmin = systemAdminRepository.saveAndFlush(branchAdmin);
 
         log.info("Yeni şube yöneticisi oluşturuldu. id: {}, şube: {}", savedBranchAdmin.getId(), branch.getBranchName());
 
@@ -123,7 +131,7 @@ public class BranchAdminService implements IBranchAdminService {
         // Adres dahil tüm alanlar yerinde güncellenir; yeni Address satırı açılmaz.
         branchAdminMapper.updateBranchAdminFromDto(request, existing);
 
-        SystemAdmin updated = systemAdminRepository.save(existing);
+        SystemAdmin updated = systemAdminRepository.saveAndFlush(existing);
         return branchAdminMapper.toResponse(updated);
     }
 
@@ -167,9 +175,68 @@ public class BranchAdminService implements IBranchAdminService {
         SystemAdmin branchAdmin = getBranchAdminEntityById(id);
 
         branchAdmin.setActive(false);
-        systemAdminRepository.save(branchAdmin);
+        branchAdmin.setTerminationDate(LocalDate.now());
+        systemAdminRepository.saveAndFlush(branchAdmin);
 
         log.info("Şube yöneticisi pasife alındı, sistem erişimi kapandı. id: {}", id);
+    }
+
+    /*
+     * Yeniden işe alım: ayrılmış şube yöneticisi geri döndüğünde yeni satır
+     * açılmıyor, mevcut kayıt güncelleniyor. TC ve kullanıcı adı değişmez
+     * (ikisi de entity'de updatable = false).
+     */
+    @Transactional
+    @Override
+    public BranchAdminResponseDto reactivateBranchAdmin(ReactivateEmployeeRequestDto request, Long id) {
+
+        SystemAdmin branchAdmin = getBranchAdminEntityById(id);
+
+        if (branchAdmin.isActive()) {
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_ACTIVE, id.toString()));
+        }
+
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
+
+        // Şube başına tek yönetici: dönülecek şube boşta olmalı.
+        if (systemAdminRepository.existsActiveByRoleAndBranch(Role.BRANCH_ADMIN, branch.getId())) {
+            throw new BaseException(new ErrorMessage(MessageType.BRANCH_ADMIN_ALREADY_ASSIGNED, branch.getBranchName()));
+        }
+
+        // E-posta yalnızca gönderildiyse ve gerçekten değiştiyse kontrol edilir.
+        if (request.getEmail() != null && !request.getEmail().equals(branchAdmin.getEmail())){
+            if (employeeRepository.existsByEmail(request.getEmail())) {
+                throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
+            }
+            branchAdmin.setEmail(request.getEmail());
+        }
+
+        // Aylar sonra dönen personel taşınmış olabilir: adres gönderildiyse yenilenir.
+        if (request.getAddress() != null) {
+            branchAdmin.setAddress(addressMapper.toEntity(request.getAddress()));
+        }
+
+        if (request.getPhoneNumber() != null) {
+            branchAdmin.setPhoneNumber(request.getPhoneNumber());
+        }
+
+        branchAdmin.setActive(true);
+        branchAdmin.setTerminationDate(null);
+        branchAdmin.setHireDate(request.getHireDate() != null ? request.getHireDate() : LocalDate.now());
+        branchAdmin.setBranch(branch);
+        branchAdmin.setBaseSalary(request.getBaseSalary());
+
+        // yeni şifre üret
+        String temporaryPassword = UUID.randomUUID().toString();
+        branchAdmin.setPassword(passwordEncoder.encode(temporaryPassword));
+        branchAdmin.setFirstLogin(true);
+
+        SystemAdmin reactivated = systemAdminRepository.saveAndFlush(branchAdmin);
+
+        log.info("Şube yöneticisi yeniden işe alındı. id: {}, şube: {}", reactivated.getId(), branch.getBranchName());
+        mailService.sendTemporaryPassword(reactivated.getEmail(), reactivated.getUsername(), temporaryPassword);
+        return branchAdminMapper.toResponse(reactivated);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package fdn.fdncargallery.service;
 
+import fdn.fdncargallery.dto.employee.ReactivateEmployeeRequestDto;
 import fdn.fdncargallery.dto.manager.CreateManagerRequestDto;
 import fdn.fdncargallery.dto.manager.ManagerResponseDto;
 import fdn.fdncargallery.dto.manager.UpdateManagerRequestDto;
@@ -10,6 +11,7 @@ import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
 import fdn.fdncargallery.exception.MessageType;
+import fdn.fdncargallery.mapper.IAddressMapper;
 import fdn.fdncargallery.mapper.IManagerMapper;
 import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +41,7 @@ public class ManagerService implements IManagerService {
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
     private final MailService mailService;
+    private final IAddressMapper  addressMapper;
 
     /*
      * Müdür oluşturma akışı:
@@ -65,15 +69,20 @@ public class ManagerService implements IManagerService {
             throw new BaseException(new ErrorMessage(MessageType.MANAGER_ALREADY_ASSIGNED, branch.getBranchName()));
         }
 
+        // TC kontrolü e-postadan ÖNCE: ayrılmış personel eski e-postasıyla geri
+        // dönerse önce "pasif kaydın var" mesajını görmeli, e-posta çakışmasını değil.
+        employeeRepository.findByIdentityNumber(createManagerRequestDto.getIdentityNumber()).ifPresent(existing -> {
+            // Bir kişi tek rolde görev yapabilir: aktif kayıt varsa ikinci kayıt açılmaz.
+            if (existing.isActive()) {
+                throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_IDENTITY_ALREADY_EXISTS, createManagerRequestDto.getIdentityNumber()));
+            }
+            // Pasif kayıt: yeni satır değil, yeniden işe alım gerekiyor. id'yi mesaja koy.
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_INACTIVE_RECORD_EXISTS, existing.getId().toString()));
+        });
+
         // aynı maille ikinci bir kayıt açılmasın diye
         if (employeeRepository.existsByEmail(createManagerRequestDto.getEmail())) {
             throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, createManagerRequestDto.getEmail()));
-        }
-
-        // Bir kişi tek rolde görev yapabilir: bu TC herhangi bir personel
-        // tablosunda varsa (müdür / danışman / yönetici) ikinci kayıt açılmaz.
-        if (employeeRepository.existsByIdentityNumber(createManagerRequestDto.getIdentityNumber())) {
-            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_IDENTITY_ALREADY_EXISTS, createManagerRequestDto.getIdentityNumber()));
         }
 
         Manager manager = managerMapper.toEntity(createManagerRequestDto);
@@ -95,7 +104,8 @@ public class ManagerService implements IManagerService {
         manager.setUsername(username);
         manager.setRole(Role.MANAGER);
 
-        Manager savedManager = managerRepository.save(manager);
+
+        Manager savedManager = managerRepository.saveAndFlush(manager);
 
         branch.setManager(savedManager);
         branchRepository.save(branch);
@@ -104,6 +114,7 @@ public class ManagerService implements IManagerService {
         mailService.sendTemporaryPassword(savedManager.getEmail(), username, temporaryPassword);
         return managerMapper.toResponse(savedManager);
     }
+
 
     @Transactional
     @Override
@@ -140,7 +151,7 @@ public class ManagerService implements IManagerService {
         // Adres dahil tüm alanlar yerinde güncellenir; yeni Address satırı açılmaz.
         managerMapper.updateManagerFromDto(updateManagerRequestDto, existingManager);
 
-        Manager updatedManager = managerRepository.save(existingManager);
+        Manager updatedManager = managerRepository.saveAndFlush(existingManager);
         return managerMapper.toResponse(updatedManager);
     }
 
@@ -190,11 +201,77 @@ public class ManagerService implements IManagerService {
             branchRepository.save(branch);
         });
 
-        // managerin aktifliğini false yap
+        // managerin aktifliğini false yap ve ayrılış tarihini ekle
         manager.setActive(false);
-        managerRepository.save(manager);
+        manager.setTerminationDate(LocalDate.now());
+        managerRepository.saveAndFlush(manager);
 
         log.info("Müdür pasife alındı. id: {}", id);
+    }
+
+    /*
+     * Yeniden işe alım: ayrılmış employee geri döndüğünde yeni bir kayıt oluşturulmaz,
+     * mevcut kayıt tekrardan active=true yapılır. Böylece kişinin geçmiş işlemleri tek bir
+     * employee kimliğine bağlı kalır. TC ve kullanıcı adı değişmemeli çünkü
+     * ikisi de entity'de updatable = false.
+     */
+    @Transactional
+    @Override
+    public ManagerResponseDto reactivateManager(ReactivateEmployeeRequestDto request, Long id) {
+
+        Manager manager = getManagerEntityById(id);
+
+        if (manager.isActive()) {
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_ACTIVE, id.toString()));
+        }
+
+        // Şube admini yalnızca kendi şubesine personel geri alabilir.
+        securityService.checkBranchAccess(request.getBranchId());
+
+        Branch branch = branchRepository.findById(request.getBranchId())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
+
+        // Bir şubede tek müdür olabilir
+        if (branch.getManager() != null) {
+            throw new BaseException(new ErrorMessage(MessageType.MANAGER_ALREADY_ASSIGNED, branch.getBranchName()));
+        }
+
+        if (request.getEmail() != null && !request.getEmail().equals(manager.getEmail())) {
+            if (employeeRepository.existsByEmail(request.getEmail())) {
+                throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
+            }
+            manager.setEmail(request.getEmail());
+        }
+
+        // adresi kontrol et
+        if (request.getAddress() != null) {
+            manager.setAddress(addressMapper.toEntity(request.getAddress()));
+        }
+
+        // telefonu kontrol et
+        if (request.getPhoneNumber() != null) {
+            manager.setPhoneNumber(request.getPhoneNumber());
+        }
+
+        manager.setActive(true);
+        manager.setTerminationDate(null);
+        manager.setHireDate(request.getHireDate() != null ? request.getHireDate() : LocalDate.now());
+        manager.setBranch(branch);
+        manager.setBaseSalary(request.getBaseSalary());
+
+        // Kayıt aylarca pasif kaldığı için eski şifre geçersiz sayılır: yeni geçici şifre üretilir.
+        String temporaryPassword = UUID.randomUUID().toString();
+        manager.setPassword(passwordEncoder.encode(temporaryPassword));
+        manager.setFirstLogin(true);
+
+        Manager reactivatedManager = managerRepository.saveAndFlush(manager);
+
+        branch.setManager(reactivatedManager);
+        branchRepository.save(branch);
+
+        log.info("Müdür yeniden işe alındı. id: {}, şube: {}", reactivatedManager.getId(), branch.getBranchName());
+        mailService.sendTemporaryPassword(reactivatedManager.getEmail(), reactivatedManager.getUsername(), temporaryPassword);
+        return managerMapper.toResponse(reactivatedManager);
     }
 
     @Override

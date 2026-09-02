@@ -12,6 +12,9 @@ import java.util.Optional;
 public interface IEmployeeRepository extends JpaRepository<BaseEmployee, Long> {
     boolean existsByIdentityNumber(String identityNumber);
 
+    // Yeniden işe alım akışı için: kayıt var mı sorusu yetmiyor, aktif mi pasif mi bilmek gerekiyor.
+    Optional<BaseEmployee> findByIdentityNumber(String identityNumber);
+
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
