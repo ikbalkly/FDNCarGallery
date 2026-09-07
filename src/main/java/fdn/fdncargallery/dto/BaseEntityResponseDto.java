@@ -21,4 +21,14 @@ public class BaseEntityResponseDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime updateTime;
+
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime deletedAt;
+
+    // Silen personel entity olarak dönmez: hesap alanları (username/password) sızmasın.
+    private Long deletedById;
+
+    private String deletedByFullName;
+
 }

@@ -1,6 +1,7 @@
 package fdn.fdncargallery.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import jakarta.validation.constraints.Digits;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "car_purchases")
+@SQLRestriction("deleted_at is null")
 public class CarPurchase extends BaseEntity {
 
    // alınan arabanın kalem kaydı

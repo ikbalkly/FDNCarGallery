@@ -34,4 +34,22 @@ public abstract class BaseEntity {
     @UpdateTimestamp
     private LocalDateTime updateTime;
 
+    // silme tarihi
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    // silen personel
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by")
+    private BaseEmployee deletedBy;
+
+    public void softDelete(BaseEmployee actor) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = actor;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
 }

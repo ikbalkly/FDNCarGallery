@@ -2,6 +2,7 @@ package fdn.fdncargallery.entity;
 
 import fdn.fdncargallery.enums.MaintenanceType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "car_maintenances")
+@SQLRestriction("deleted_at is null")
 public class CarMaintenance extends BaseEntity {
 
     // bakıma giren araba
