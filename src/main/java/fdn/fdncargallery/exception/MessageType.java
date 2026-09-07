@@ -51,6 +51,7 @@ public enum MessageType {
     // Ayrılmış personel geri dönüyor: yeni kayıt yerine mevcut kaydı yeniden aktifleştir.
     EMPLOYEE_INACTIVE_RECORD_EXISTS("5011", "Bu TC kimlik numarasına ait pasif bir personel kaydı var. Yeni kayıt açmak yerine yeniden işe alım yapın.", HttpStatus.CONFLICT),
     EMPLOYEE_ALREADY_ACTIVE("5012", "Bu personel zaten aktif durumda, yeniden işe alım yapılamaz.", HttpStatus.CONFLICT),
+    EMPLOYEE_ALREADY_INACTIVE("5013", "Bu personel zaten pasif durumda, ayrılış işlemi tekrarlanamaz.", HttpStatus.CONFLICT),
 
     // --- 6000: Bakım ve ekspertiz ---
     STOCK_ITEM_ALREADY_IN_MAINTENANCE("6000", "Bu araç şu anda aktif olarak bakımda görünmektedir, yeni bakım kaydı açılamaz.", HttpStatus.CONFLICT),
@@ -69,6 +70,11 @@ public enum MessageType {
     STOCK_ITEM_NOT_FOUND("7006", "Belirtilen stok kalemi sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     VEHICLE_ALREADY_IN_STOCK("7007", "Bu araç için halihazırda açık bir stok kaydı bulunuyor. Aynı araç aynı anda iki kez stoğa alınamaz.", HttpStatus.CONFLICT),
     PLATE_ALREADY_IN_STOCK("7008", "Bu plakayla açık bir stok kaydı bulunuyor.", HttpStatus.CONFLICT),
+    // Marka ve model referans veridir: araç kaydı sırasında oluşturulmaz, önceden tanımlı olmalıdır.
+    BRAND_NOT_FOUND("7009", "Belirtilen marka sistemde tanımlı değil. Önce marka kaydını oluşturun.", HttpStatus.NOT_FOUND),
+    MODEL_NOT_FOUND("7010", "Bu marka altında belirtilen model tanımlı değil. Önce model kaydını oluşturun.", HttpStatus.NOT_FOUND),
+    BRAND_ALREADY_EXISTS("7011", "Bu marka zaten tanımlı.", HttpStatus.CONFLICT),
+    MODEL_ALREADY_EXISTS("7012", "Bu model, seçilen marka altında zaten tanımlı.", HttpStatus.CONFLICT),
 
     CUSTOMER_NOT_FOUND("8000", "Belirtilen müşteri sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     ADDRESS_NOT_FOUND("8001", "Adres bilgisi bulunamadı.", HttpStatus.NOT_FOUND),

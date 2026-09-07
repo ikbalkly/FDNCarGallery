@@ -174,8 +174,17 @@ public class BranchAdminService implements IBranchAdminService {
 
         SystemAdmin branchAdmin = getBranchAdminEntityById(id);
 
-        branchAdmin.setActive(false);
-        branchAdmin.setTerminationDate(LocalDate.now());
+        // Zaten pasifse dokunma: aksi halde ilk ayrılış tarihi bugünle ezilir.
+        if (!branchAdmin.isActive()) {
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_INACTIVE, id.toString()));
+        }
+
+        // ayrılma kuralı entity'de: active=false + terminationDate
+        branchAdmin.terminate(null);
+
+        // denetim izi: işlemi kimin ne zaman yaptığı
+        branchAdmin.softDelete(securityService.getCurrentEmployee());
+
         systemAdminRepository.saveAndFlush(branchAdmin);
 
         log.info("Şube yöneticisi pasife alındı, sistem erişimi kapandı. id: {}", id);
@@ -221,8 +230,7 @@ public class BranchAdminService implements IBranchAdminService {
             branchAdmin.setPhoneNumber(request.getPhoneNumber());
         }
 
-        branchAdmin.setActive(true);
-        branchAdmin.setTerminationDate(null);
+        branchAdmin.reactivate();
         branchAdmin.setHireDate(request.getHireDate() != null ? request.getHireDate() : LocalDate.now());
         branchAdmin.setBranch(branch);
         branchAdmin.setBaseSalary(request.getBaseSalary());
