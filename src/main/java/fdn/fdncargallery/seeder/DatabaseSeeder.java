@@ -2,10 +2,14 @@ package fdn.fdncargallery.seeder;
 
 import fdn.fdncargallery.entity.Address;
 import fdn.fdncargallery.entity.Branch;
+import fdn.fdncargallery.entity.Brand;
+import fdn.fdncargallery.entity.Model;
 import fdn.fdncargallery.entity.SystemAdmin;
 import fdn.fdncargallery.enums.Role;
 import fdn.fdncargallery.repository.IBranchRepository;
+import fdn.fdncargallery.repository.IBrandRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
+import fdn.fdncargallery.repository.IModelRepository;
 import fdn.fdncargallery.repository.ISystemAdminRepository;
 import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
@@ -29,6 +33,8 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final IEmployeeRepository employeeRepository;
     private final ISystemAdminRepository systemAdminRepository;
     private final IBranchRepository branchRepository;
+    private final IBrandRepository brandRepository;
+    private final IModelRepository modelRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsernameGenerator usernameGenerator;
 
@@ -49,6 +55,35 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         seedSystemAdmin();
         seedBranchAdmin();
+        seedBrandsAndModels();
+    }
+
+    private void seedBrandsAndModels() {
+
+        seedBrand("Ford", "Focus", "Fiesta", "Kuga", "Puma");
+        seedBrand("Volkswagen", "Golf", "Passat", "Polo", "Tiguan");
+        seedBrand("Renault", "Clio", "Megane", "Captur", "Taliant");
+        seedBrand("Toyota", "Corolla", "Yaris", "C-HR", "RAV4");
+        seedBrand("Fiat", "Egea", "500", "Panda", "Doblo");
+        seedBrand("BMW", "3 Serisi", "5 Serisi", "X1", "X3");
+        seedBrand("Mercedes-Benz", "A-Serisi", "C-Serisi", "E-Serisi", "GLC");
+        seedBrand("Hyundai", "i20", "i30", "Tucson", "Bayon");
+
+        log.info("Marka/model referans verisi yüklendi.");
+    }
+
+    private void seedBrand(String brandName, String... modelNames) {
+
+        Brand brand = new Brand();
+        brand.setBrandName(brandName);
+        Brand savedBrand = brandRepository.save(brand);
+
+        for (String modelName : modelNames) {
+            Model model = new Model();
+            model.setModelName(modelName);
+            model.setBrand(savedBrand);
+            modelRepository.save(model);
+        }
     }
 
     private void seedSystemAdmin() {
@@ -124,13 +159,13 @@ public class DatabaseSeeder implements CommandLineRunner {
         return configured;
     }
 
-    private Address systemAddress(String fullAddress) {
+    private Address systemAddress(String buildingName) {
         Address address = new Address();
         address.setCity("Sistem");
         address.setDistrict("Merkez");
         address.setNeighborhood("Merkez");
-        address.setStreet("IT Bilişim Sokağı");
-        address.setFullAddress(fullAddress);
+        address.setStreet("IT Bilişim");
+        address.setBuildingName(buildingName);
         return address;
     }
 
@@ -138,10 +173,11 @@ public class DatabaseSeeder implements CommandLineRunner {
         Address address = new Address();
         address.setCity("Ankara");
         address.setDistrict("Çankaya");
-        address.setNeighborhood("Üniversiteler Mahallesi");
+        address.setNeighborhood("Üniversiteler");
         address.setStreet("1596. Cadde");
+        address.setBuildingName("Cyberpark");
+        address.setBuildingNo("6");
         address.setZipCode("06800");
-        address.setFullAddress("Üniversiteler Mah. 1596. Cad. Cyberpark No:6, 06800 Çankaya/Ankara");
         return address;
     }
 }

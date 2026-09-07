@@ -4,6 +4,7 @@ import fdn.fdncargallery.dto.stockItem.CreateStockItemRequestDto;
 import fdn.fdncargallery.dto.stockItem.StockItemResponseDto;
 import fdn.fdncargallery.dto.stockItem.UpdateStockItemRequestDto;
 import fdn.fdncargallery.entity.BaseEmployee;
+import fdn.fdncargallery.entity.Brand;
 import fdn.fdncargallery.entity.Branch;
 import fdn.fdncargallery.entity.StockItem;
 import fdn.fdncargallery.entity.Vehicle;
@@ -16,6 +17,8 @@ import fdn.fdncargallery.mapper.IVehicleMapper;
 import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IStockItemRepository;
 import fdn.fdncargallery.repository.IVehicleRepository;
+import fdn.fdncargallery.service.interfaces.IBrandService;
+import fdn.fdncargallery.service.interfaces.IModelService;
 import fdn.fdncargallery.service.interfaces.IStockItemService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,8 @@ public class StockItemService implements IStockItemService {
     private final IStockItemMapper stockItemMapper;
     private final IVehicleMapper vehicleMapper;
     private final SecurityService securityService;
+    private final IBrandService brandService;
+    private final IModelService modelService;
 
     /*
      * Stok girişi akışı:
@@ -64,8 +69,6 @@ public class StockItemService implements IStockItemService {
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND,
                         targetBranchId.toString())));
 
-        // Türkçe locale'de "i".toUpperCase() "İ" üretir ve aynı
-        // VIN iki farklı metne dönüşürdü.
         String vin = createStockItemRequestDto.getVehicle().getVin().trim().toUpperCase(Locale.ROOT);
 
         // yeni Vehicle kaydetmeden
@@ -109,9 +112,6 @@ public class StockItemService implements IStockItemService {
     public StockItemResponseDto updateStockItem(UpdateStockItemRequestDto updateStockItemRequestDto, Long id) {
 
         StockItem existingStockItem = getStockItemEntityById(id);
-
-        // branchId : Create'ten FARKLI olarak varsayılan "kendi şubem"
-        // değil, "aracın bulunduğu şube": burada boş bırakmak "şubeyi değiştirme" demektir.
 
         Long targetBranchId = updateStockItemRequestDto.getBranchId() != null
                 ? updateStockItemRequestDto.getBranchId()
@@ -237,6 +237,12 @@ public class StockItemService implements IStockItemService {
                 .orElseGet(() -> {
                     Vehicle newVehicle = vehicleMapper.toEntity(request.getVehicle());
                     newVehicle.setVin(vin);
+
+                    // Marka/model adla geliyor: referans tabloda tanımlı değilse araç açılmaz.
+                    Brand brand = brandService.getBrandEntityByName(request.getVehicle().getBrand());
+                    newVehicle.setBrand(brand);
+                    newVehicle.setModel(modelService.getModelEntityByBrandAndName(brand, request.getVehicle().getModel()));
+
                     return vehicleRepository.save(newVehicle);
                 });
     }
