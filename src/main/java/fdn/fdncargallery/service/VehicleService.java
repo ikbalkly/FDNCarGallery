@@ -2,6 +2,7 @@ package fdn.fdncargallery.service;
 
 import fdn.fdncargallery.dto.vehicle.UpdateVehicleRequestDto;
 import fdn.fdncargallery.dto.vehicle.VehicleResponseDto;
+import fdn.fdncargallery.entity.Brand;
 import fdn.fdncargallery.entity.Vehicle;
 import fdn.fdncargallery.enums.CarStatus;
 import fdn.fdncargallery.exception.BaseException;
@@ -10,6 +11,8 @@ import fdn.fdncargallery.exception.MessageType;
 import fdn.fdncargallery.mapper.IVehicleMapper;
 import fdn.fdncargallery.repository.IStockItemRepository;
 import fdn.fdncargallery.repository.IVehicleRepository;
+import fdn.fdncargallery.service.interfaces.IBrandService;
+import fdn.fdncargallery.service.interfaces.IModelService;
 import fdn.fdncargallery.service.interfaces.IVehicleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,8 @@ public class VehicleService implements IVehicleService {
     private final IStockItemRepository stockItemRepository;
     private final IVehicleMapper vehicleMapper;
     private final SecurityService securityService;
+    private final IBrandService brandService;
+    private final IModelService modelService;
 
     @Transactional
     @Override
@@ -35,6 +40,11 @@ public class VehicleService implements IVehicleService {
         checkVehicleAccess(id);
 
         vehicleMapper.updateVehicleFromDto(updateVehicleRequestDto, vehicle);
+
+        // Marka/model adla geliyor: referans tabloda tanımlı değilse kayıt güncellenmez.
+        Brand brand = brandService.getBrandEntityByName(updateVehicleRequestDto.getBrand());
+        vehicle.setBrand(brand);
+        vehicle.setModel(modelService.getModelEntityByBrandAndName(brand, updateVehicleRequestDto.getModel()));
 
         Vehicle updatedVehicle = vehicleRepository.save(vehicle);
 

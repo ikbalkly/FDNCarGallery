@@ -5,6 +5,7 @@ import fdn.fdncargallery.enums.Drivetrain;
 import fdn.fdncargallery.enums.FuelType;
 import fdn.fdncargallery.enums.TransmissionType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,23 +15,26 @@ import java.util.List;
 
 @Entity
 @Table(name = "vehicles")
+@SQLRestriction("deleted_at is null")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle extends BaseEntity {
 
-    // Aracın değişmez kimliği. Bir fiziksel araç sistemde YALNIZCA BİR KEZ bulunur.
+    // aracın tc'si
     @Column(nullable = false, unique = true, length = 17, updatable = false)
     private String vin;
 
     // marka
-    @Column(nullable = false)
-    private String brand;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
+    private Brand brand;
 
     // model
-    @Column(nullable = false)
-    private String model;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
+    private Model model;
 
     // seri
     @Column(nullable = false)

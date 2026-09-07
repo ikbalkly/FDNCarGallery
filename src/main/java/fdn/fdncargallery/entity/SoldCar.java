@@ -1,6 +1,7 @@
 package fdn.fdncargallery.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "sold_cars")
+@SQLRestriction("deleted_at is null")
 
 public class SoldCar extends BaseEntity {
 

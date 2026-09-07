@@ -41,7 +41,7 @@ public class ManagerService implements IManagerService {
     private final UsernameGenerator usernameGenerator;
     private final SecurityService securityService;
     private final MailService mailService;
-    private final IAddressMapper  addressMapper;
+    private final IAddressMapper addressMapper;
 
     /*
      * Müdür oluşturma akışı:
@@ -174,8 +174,10 @@ public class ManagerService implements IManagerService {
     @Transactional
     @Override
     public List<ManagerResponseDto> findAllManagers() {
+
         // SUPER_ADMIN tüm aktif müdürleri; ADMIN ve MANAGER yalnızca kendi
         // şubesindekileri görür.
+
         List<Manager> managers = securityService.isSuperAdmin()
                 ? managerRepository.findAllByActiveTrue()
                 : managerRepository.findAllByBranchIdAndActiveTrue(securityService.getCurrentBranchId());
@@ -192,6 +194,11 @@ public class ManagerService implements IManagerService {
         // istekte gönderilen id ile ilgili entity var mı kontrolü?
         Manager manager = getManagerEntityById(id);
 
+        // Zaten pasifse dokunma: aksi halde ilk ayrılış tarihi bugünle ezilir.
+        if (!manager.isActive()) {
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_INACTIVE, id.toString()));
+        }
+
         // Şube admini başka şubenin müdürünü pasife alamasın.
         securityService.checkBranchAccess(manager.getBranch() != null ? manager.getBranch().getId() : null);
 
@@ -201,9 +208,12 @@ public class ManagerService implements IManagerService {
             branchRepository.save(branch);
         });
 
-        // managerin aktifliğini false yap ve ayrılış tarihini ekle
-        manager.setActive(false);
-        manager.setTerminationDate(LocalDate.now());
+        // ayrılma kuralı entity'de: active=false + terminationDate
+        manager.terminate(LocalDate.now());
+
+        // denetim izi: işlemi kimin ne zaman yaptığı
+        manager.softDelete(securityService.getCurrentEmployee());
+
         managerRepository.saveAndFlush(manager);
 
         log.info("Müdür pasife alındı. id: {}", id);
@@ -253,13 +263,12 @@ public class ManagerService implements IManagerService {
             manager.setPhoneNumber(request.getPhoneNumber());
         }
 
-        manager.setActive(true);
-        manager.setTerminationDate(null);
+        manager.reactivate();
         manager.setHireDate(request.getHireDate() != null ? request.getHireDate() : LocalDate.now());
         manager.setBranch(branch);
         manager.setBaseSalary(request.getBaseSalary());
 
-        // Kayıt aylarca pasif kaldığı için eski şifre geçersiz sayılır: yeni geçici şifre üretilir.
+        // yeni şifre generate edilir
         String temporaryPassword = UUID.randomUUID().toString();
         manager.setPassword(passwordEncoder.encode(temporaryPassword));
         manager.setFirstLogin(true);

@@ -21,6 +21,8 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "employees")
+// Personelde @SQLRestriction YOK: deletedAt/deletedBy burada denetim izidir, kaydı
+// gizlemez. Görünürlüğü active yönetir, aksi halde yeniden işe alım kaydı bulamaz.
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "employee_type", discriminatorType = DiscriminatorType.STRING, length = 50)
 public abstract class BaseEmployee extends BaseEntity implements UserDetails {
@@ -78,7 +80,7 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private boolean isFirstLogin = true;
 
-    // adres -> personel satırına gömülür, ayrı tablo yok
+    // adres
     @Embedded
     private Address address;
 
@@ -87,12 +89,31 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @JoinColumn(nullable = false)
     private Branch branch;
 
-   // null gelirse, günün tarihini setler
+   // hireDate null gelirse, günün tarihini setler
     @PrePersist
     private void applyHireDateDefault() {
         if (hireDate == null) {
             hireDate = LocalDate.now();
         }
+    }
+
+    // işten çıkma durumunda bilgileri setler
+    public void terminate(LocalDate date) {
+        this.active = false;
+        this.terminationDate = (date == null) ? LocalDate.now() : date;
+    }
+
+    // yeniden işe girişte bilgileri tekrardan setler
+    public void reactivate() {
+        this.active = true;
+        this.terminationDate = null;
+    }
+
+
+    // ad + soyad; response DTO'larında tek alan olarak dönülür
+    @Transient
+    public String getFullName() {
+        return name + " " + surname;
     }
 
     @Override

@@ -5,16 +5,12 @@ import fdn.fdncargallery.dto.soldCar.SoldCarResponseDto;
 import fdn.fdncargallery.entity.SoldCar;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(config = IBaseMapperConfig.class)
 public interface ISoldCarMapper {
 
     // İlişkisel nesneler, satış tarihi ve prim oranı servis katmanında set edilir.
     // commissionRate özellikle istemciden ALINMAZ: satış anındaki oran SalesRep'ten kopyalanır.
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "stockItem", ignore = true)
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "salesRepEmployee", ignore = true)
@@ -26,7 +22,7 @@ public interface ISoldCarMapper {
     @Mapping(target = "stockItemId", source = "stockItem.id")
     @Mapping(target = "plateNumber", source = "stockItem.plateNumber")
     @Mapping(target = "vin", source = "stockItem.vehicle.vin")
-    @Mapping(target = "brandAndModel", expression = "java(soldCar.getStockItem().getVehicle().getBrand() + \" \" + soldCar.getStockItem().getVehicle().getModel())")
+    @Mapping(target = "brandAndModel", expression = "java(soldCar.getStockItem().getVehicle().getBrand().getBrandName() + \" \" + soldCar.getStockItem().getVehicle().getModel().getModelName())")
 
     // Müşteri bilgileri
     @Mapping(target = "customerId", source = "customer.id")

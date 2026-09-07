@@ -1,6 +1,7 @@
 package fdn.fdncargallery.dto.address;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,9 +28,16 @@ public class AddressRequestDto {
     @NotBlank(message = "Sokak alanı boş bırakılamaz!")
     private String street;
 
-    private String zipCode;
+    // Bina / site adı, bina no ve daire no opsiyoneldir: her adreste bulunmaz.
+    @Size(max = 100, message = "Bina / site adı en fazla 100 karakter olabilir.")
+    private String buildingName;
 
-    @NotBlank(message = "Açık adres detayları boş bırakılamaz!")
-    @Size(min = 10, max = 255, message = "Açık adres en az 10, en fazla 255 karakter olmalıdır.")
-    private String fullAddress;
+    @Size(max = 10, message = "Bina no en fazla 10 karakter olabilir.")
+    private String buildingNo;
+
+    @Size(max = 10, message = "Daire no en fazla 10 karakter olabilir.")
+    private String doorNo;
+
+    @Pattern(regexp = "^$|^\\d{5}$", message = "Posta kodu 5 haneli olmalıdır.")
+    private String zipCode;
 }

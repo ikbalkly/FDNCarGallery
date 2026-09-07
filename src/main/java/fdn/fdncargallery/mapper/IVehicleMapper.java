@@ -7,23 +7,23 @@ import fdn.fdncargallery.entity.Vehicle;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(config = IBaseMapperConfig.class)
 public interface IVehicleMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
+    // brand/model referans veri: adıyla geliyor, servis katmanında çözülüp set ediliyor.
+    @Mapping(target = "brand", ignore = true)
+    @Mapping(target = "model", ignore = true)
     @Mapping(target = "stockItems", ignore = true)
     Vehicle toEntity(CreateVehicleRequestDto request);
 
+    @Mapping(target = "brand", source = "brand.brandName")
+    @Mapping(target = "model", source = "model.modelName")
     VehicleResponseDto toResponse(Vehicle vehicle);
 
     // vin ignore: entity'de updatable = false, kimlik değişmez.
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
+    @Mapping(target = "brand", ignore = true)
+    @Mapping(target = "model", ignore = true)
     @Mapping(target = "vin", ignore = true)
     @Mapping(target = "stockItems", ignore = true)
     void updateVehicleFromDto(UpdateVehicleRequestDto request, @MappingTarget Vehicle vehicle);

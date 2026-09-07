@@ -5,14 +5,10 @@ import fdn.fdncargallery.dto.carMaintenance.CreateCarMaintenanceRequestDto;
 import fdn.fdncargallery.entity.CarMaintenance;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(config = IBaseMapperConfig.class)
 public interface ICarMaintenanceMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "stockItem", ignore = true)
     @Mapping(target = "employee", ignore = true)
     @Mapping(target = "endDate", ignore = true)
@@ -22,7 +18,7 @@ public interface ICarMaintenanceMapper {
     // Stok kalemi ve araç bilgileri
     @Mapping(target = "stockItemId", source = "stockItem.id")
     @Mapping(target = "plateNumber", source = "stockItem.plateNumber")
-    @Mapping(target = "brandAndModel", expression = "java(maintenance.getStockItem().getVehicle().getBrand() + \" \" + maintenance.getStockItem().getVehicle().getModel())")
+    @Mapping(target = "brandAndModel", expression = "java(maintenance.getStockItem().getVehicle().getBrand().getBrandName() + \" \" + maintenance.getStockItem().getVehicle().getModel().getModelName())")
 
     // Bakım hâlâ açık mı? Tek doğruluk kaynağı endDate.
     @Mapping(target = "completed", expression = "java(maintenance.getEndDate() != null)")

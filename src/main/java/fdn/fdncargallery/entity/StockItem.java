@@ -4,6 +4,7 @@ import fdn.fdncargallery.enums.CarCondition;
 import fdn.fdncargallery.enums.CarStatus;
 import fdn.fdncargallery.enums.WarrantyType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "stock_items")
+@SQLRestriction("deleted_at is null")
 @Getter
 @Setter
 @NoArgsConstructor

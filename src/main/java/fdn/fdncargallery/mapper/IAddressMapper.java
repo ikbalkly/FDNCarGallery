@@ -10,8 +10,8 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface IAddressMapper {
 
-    // Address artık gömülü bir değer nesnesi: id/createTime/updateTime yok,
-    // bu yüzden ignore edilecek alan da kalmadı.
+    // Address gömülü bir değer nesnesi: id/createTime/updateTime yok.
+    // fullAddress entity'de setter'ı olmayan hesaplanmış bir alan, hedef sayılmaz.
     Address toEntity(AddressRequestDto addressRequestDto);
 
     AddressResponseDto toDto(Address address);
