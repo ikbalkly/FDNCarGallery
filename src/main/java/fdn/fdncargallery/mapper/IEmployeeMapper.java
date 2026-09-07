@@ -5,9 +5,8 @@ import fdn.fdncargallery.dto.employee.EmployeeSearchResultDto;
 import fdn.fdncargallery.entity.BaseEmployee;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", uses = {IAddressMapper.class}, unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(config = IBaseMapperConfig.class, uses = {IAddressMapper.class})
 public interface IEmployeeMapper {
 
     // Sadece veritabanından çekilen genel personelleri (BaseEmployee), ortak formata çeviriyoruz

@@ -5,15 +5,11 @@ import fdn.fdncargallery.dto.expertReport.ExpertReportResponseDto;
 import fdn.fdncargallery.entity.ExpertReport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(config = IBaseMapperConfig.class)
 public interface IExpertReportMapper {
 
     // stockItem servis katmanında id ile bulunarak set edilir.
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "stockItem", ignore = true)
     ExpertReport toEntity(CreateExpertReportRequestDto request);
 
@@ -21,6 +17,6 @@ public interface IExpertReportMapper {
     @Mapping(target = "stockItemId", source = "stockItem.id")
     @Mapping(target = "plateNumber", source = "stockItem.plateNumber")
     @Mapping(target = "vin", source = "stockItem.vehicle.vin")
-    @Mapping(target = "brandAndModel", expression = "java(expertReport.getStockItem().getVehicle().getBrand() + \" \" + expertReport.getStockItem().getVehicle().getModel())")
+    @Mapping(target = "brandAndModel", expression = "java(expertReport.getStockItem().getVehicle().getBrand().getBrandName() + \" \" + expertReport.getStockItem().getVehicle().getModel().getModelName())")
     ExpertReportResponseDto toResponse(ExpertReport expertReport);
 }

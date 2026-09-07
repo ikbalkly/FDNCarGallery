@@ -7,14 +7,12 @@ import fdn.fdncargallery.entity.Manager;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.WARN, uses = {IAddressMapper.class}, componentModel = "spring")
+@Mapper(config = IBaseMapperConfig.class, uses = {IAddressMapper.class})
 public interface IManagerMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
+    // authorities: UserDetails'ten gelen türetilmiş koleksiyon, role'den üretilir.
+    @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "branch", ignore = true)
     // hesap alanları sunucuda üretiliyor; çıkış tarihi kayıt anında boş
@@ -29,9 +27,6 @@ public interface IManagerMapper {
     @Mapping(target = "branchName", source = "branch.branchName")
     ManagerResponseDto toResponse(Manager manager);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(target = "branch", ignore = true)
     @Mapping(target = "identityNumber", ignore = true)

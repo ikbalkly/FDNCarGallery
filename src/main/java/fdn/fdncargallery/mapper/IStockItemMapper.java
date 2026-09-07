@@ -7,14 +7,10 @@ import fdn.fdncargallery.entity.StockItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring", uses = {IVehicleMapper.class}, unmappedTargetPolicy = ReportingPolicy.WARN)
+@Mapper(config = IBaseMapperConfig.class, uses = {IVehicleMapper.class})
 public interface IStockItemMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "branch", ignore = true)
     @Mapping(target = "status", ignore = true)
@@ -31,9 +27,6 @@ public interface IStockItemMapper {
     @Mapping(target = "employeeFullName", expression = "java(stockItem.getEmployee().getName() + \" \" + stockItem.getEmployee().getSurname())")
     StockItemResponseDto toResponse(StockItem stockItem);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createTime", ignore = true)
-    @Mapping(target = "updateTime", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     @Mapping(target = "branch", ignore = true)
     @Mapping(target = "status", ignore = true)
