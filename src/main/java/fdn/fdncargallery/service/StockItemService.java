@@ -71,13 +71,8 @@ public class StockItemService implements IStockItemService {
 
         String vin = createStockItemRequestDto.getVehicle().getVin().trim().toUpperCase(Locale.ROOT);
 
-        // yeni Vehicle kaydetmeden
-        // plakayı kontrol edersek, hata durumunda boşuna insert yapılmamış olur.
-        // Plaka entity'de bilerek unique DEĞİL (aynı plaka farklı dönemlerde
-        // farklı kalemlerde görünebilir), bu yüzden tekilliği burada koruyoruz.
-        // SOLD dışındaki her durum "hâlâ bizde" demek.
-
         //Veritabanında bu plakaya (örn: 34ABC123) sahip ve durumu SATILDI (SOLD) OLMAYAN herhangi bir kayıt var mı?
+        // true dönerse elimizde bu plakaya ait bir araç var demek
         if (stockItemRepository.existsByPlateNumberAndStatusNot(
                 createStockItemRequestDto.getPlateNumber(), CarStatus.SOLD)) {
             throw new BaseException(new ErrorMessage(MessageType.PLATE_ALREADY_IN_STOCK,
@@ -136,9 +131,7 @@ public class StockItemService implements IStockItemService {
                     updateStockItemRequestDto.getPlateNumber()));
         }
 
-        // Şube değişiyorsa hedef şube gerçekten var mı? Mapper 'branch' alanını
-        // ignore ettiği için ilişkiyi burada elle kuruyoruz. branchId boş
-        // geldiyse targetBranchId mevcut şubeye eşittir ve bu blok hiç çalışmaz.
+        // Şube değişiyorsa hedef şube gerçekten var mı?
         if (!existingStockItem.getBranch().getId().equals(targetBranchId)) {
             Branch newBranch = branchRepository.findById(targetBranchId)
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND,
