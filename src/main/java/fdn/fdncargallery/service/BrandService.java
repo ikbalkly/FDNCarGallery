@@ -31,6 +31,7 @@ public class BrandService implements IBrandService {
         String brandName = request.getBrandName().trim();
 
         // Büyük/küçük harf farkı yeni marka sayılmaz: "ford" ile "Ford" aynı markadır.
+        // select * from fdncargallery.brands where upper(brand_name) = upper(?)
         if (brandRepository.existsByBrandNameIgnoreCase(brandName)) {
             throw new BaseException(new ErrorMessage(MessageType.BRAND_ALREADY_EXISTS, brandName));
         }

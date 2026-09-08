@@ -21,7 +21,6 @@ public interface IBaseMapperConfig {
     @Mapping(target = "deletedBy", ignore = true)
     BaseEntity anyDtoToBaseEntity(Object dto);
 
-    // Ters yön: silen personel entity olarak değil, id + ad soyad olarak dönülür.
     @Mapping(target = "deletedById", source = "deletedBy.id")
     @Mapping(target = "deletedByFullName", source = "deletedBy.fullName")
     BaseEntityResponseDto baseEntityToResponse(BaseEntity entity);
