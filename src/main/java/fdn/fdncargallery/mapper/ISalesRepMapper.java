@@ -2,9 +2,11 @@ package fdn.fdncargallery.mapper;
 
 import fdn.fdncargallery.dto.salesRep.CreateSalesRepRequestDto;
 import fdn.fdncargallery.dto.salesRep.SalesRepResponseDto;
+import fdn.fdncargallery.dto.salesRep.UpdateSalesRepRequestDto;
 import fdn.fdncargallery.entity.SalesRep;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(config = IBaseMapperConfig.class, uses = {IAddressMapper.class})
 public interface ISalesRepMapper {
@@ -24,4 +26,17 @@ public interface ISalesRepMapper {
     @Mapping(target = "branchId", source = "branch.id")
     @Mapping(target = "branchName", source = "branch.branchName")
     SalesRepResponseDto toSalesRepResponse(SalesRep salesRep);
+
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "branch", ignore = true)
+    @Mapping(target = "identityNumber", ignore = true)
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "hireDate", ignore = true)
+    @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "monthlySalesCount", ignore = true)
+    void updateSalesRepFromDto(UpdateSalesRepRequestDto request, @MappingTarget SalesRep salesRep);
 }
