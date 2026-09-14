@@ -17,12 +17,14 @@ import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
 import fdn.fdncargallery.repository.ISystemAdminRepository;
 import fdn.fdncargallery.service.interfaces.IBranchAdminService;
+import fdn.fdncargallery.service.interfaces.IRefreshTokenService;
 import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +44,7 @@ public class BranchAdminService implements IBranchAdminService {
     private final SecurityService securityService;
     private final MailService mailService;
     private final IAddressMapper addressMapper;
+    private final IRefreshTokenService refreshTokenService;
 
     /*
      * Oluşturma akışı:
@@ -116,8 +119,20 @@ public class BranchAdminService implements IBranchAdminService {
 
         SystemAdmin existing = getBranchAdminEntityById(id);
 
+        // pasif personel güncellenmez; geri getirmek reactivate akışının işi
+        if (!existing.isActive()) {
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_NOT_ACTIVE, id.toString()));
+        }
+
+        // e-posta değiştiyse başka bir personelde kullanılıyor mu?
+        if (!request.getEmail().equals(existing.getEmail())
+                && employeeRepository.existsByEmail(request.getEmail())) {
+            throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
+        }
+
         // Şube değişiyorsa hedef şube gerçekten var mı ve boşta mı?
         if (existing.getBranch() == null || !existing.getBranch().getId().equals(request.getBranchId())) {
+            Long oldBranchId = existing.getBranch() != null ? existing.getBranch().getId() : null;
 
             Branch targetBranch = branchRepository.findById(request.getBranchId())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
@@ -126,12 +141,15 @@ public class BranchAdminService implements IBranchAdminService {
                 throw new BaseException(new ErrorMessage(MessageType.BRANCH_ADMIN_ALREADY_ASSIGNED, targetBranch.getBranchName()));
             }
             existing.setBranch(targetBranch);
+
+            log.info("Şube yöneticisi şube değiştiriyor. id: {}, eski şube: {}, yeni şube: {}", id, oldBranchId, targetBranch.getId());
         }
 
         // Adres dahil tüm alanlar yerinde güncellenir; yeni Address satırı açılmaz.
         branchAdminMapper.updateBranchAdminFromDto(request, existing);
 
         SystemAdmin updated = systemAdminRepository.saveAndFlush(existing);
+        log.info("Şube yöneticisi güncellendi. id: {}, şube: {}", updated.getId(), updated.getBranch().getBranchName());
         return branchAdminMapper.toResponse(updated);
     }
 
@@ -187,6 +205,9 @@ public class BranchAdminService implements IBranchAdminService {
 
         systemAdminRepository.saveAndFlush(branchAdmin);
 
+        // açık oturumlar kapatılır; aksi halde hesap geri alınınca eski refresh token'lar yeniden çalışır
+        refreshTokenService.revokeAllTokens(branchAdmin);
+
         log.info("Şube yöneticisi pasife alındı, sistem erişimi kapandı. id: {}", id);
     }
 
@@ -200,6 +221,7 @@ public class BranchAdminService implements IBranchAdminService {
     public BranchAdminResponseDto reactivateBranchAdmin(ReactivateEmployeeRequestDto request, Long id) {
 
         SystemAdmin branchAdmin = getBranchAdminEntityById(id);
+        String oldEmail = branchAdmin.getEmail();
 
         if (branchAdmin.isActive()) {
             throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_ACTIVE, id.toString()));
@@ -213,8 +235,8 @@ public class BranchAdminService implements IBranchAdminService {
             throw new BaseException(new ErrorMessage(MessageType.BRANCH_ADMIN_ALREADY_ASSIGNED, branch.getBranchName()));
         }
 
-        // E-posta yalnızca gönderildiyse ve gerçekten değiştiyse kontrol edilir.
-        if (request.getEmail() != null && !request.getEmail().equals(branchAdmin.getEmail())){
+        // E-posta yalnızca dolu gönderildiyse ve gerçekten değiştiyse kontrol edilir; boş string mevcut e-postayı ezmesin.
+        if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equals(branchAdmin.getEmail())){
             if (employeeRepository.existsByEmail(request.getEmail())) {
                 throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
             }
@@ -242,7 +264,13 @@ public class BranchAdminService implements IBranchAdminService {
 
         SystemAdmin reactivated = systemAdminRepository.saveAndFlush(branchAdmin);
 
+        // şifre sıfırlandı: bu değişiklikten önce pasife alınmış hesaplarda kalmış token'lar da kapanır
+        refreshTokenService.revokeAllTokens(reactivated);
+
         log.info("Şube yöneticisi yeniden işe alındı. id: {}, şube: {}", reactivated.getId(), branch.getBranchName());
+        if (!oldEmail.equals(reactivated.getEmail())) {
+            log.warn("Yeniden işe alımda e-posta değiştirildi. personel id: {}, eski: {}, yeni: {}", id, oldEmail, reactivated.getEmail());
+        }
         mailService.sendTemporaryPassword(reactivated.getEmail(), reactivated.getUsername(), temporaryPassword);
         return branchAdminMapper.toResponse(reactivated);
     }

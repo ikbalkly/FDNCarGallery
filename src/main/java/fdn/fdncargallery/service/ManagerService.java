@@ -17,12 +17,14 @@ import fdn.fdncargallery.repository.IBranchRepository;
 import fdn.fdncargallery.repository.IEmployeeRepository;
 import fdn.fdncargallery.repository.IManagerRepository;
 import fdn.fdncargallery.service.interfaces.IManagerService;
+import fdn.fdncargallery.service.interfaces.IRefreshTokenService;
 import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,6 +44,7 @@ public class ManagerService implements IManagerService {
     private final SecurityService securityService;
     private final MailService mailService;
     private final IAddressMapper addressMapper;
+    private final IRefreshTokenService refreshTokenService;
 
     /*
      * Müdür oluşturma akışı:
@@ -123,13 +126,25 @@ public class ManagerService implements IManagerService {
         // var olan müdürün id'si
         Manager existingManager = getManagerEntityById(id);
 
+        // pasif personel güncellenmez; geri getirmek reactivate akışının işi
+        if (!existingManager.isActive()) {
+            throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_NOT_ACTIVE, id.toString()));
+        }
+
         // Hem müdürün MEVCUT şubesi hem ATANACAĞI şube erişim alanında olmalı;
         // aksi halde şube admini kendi müdürünü başka şubeye kaydeder.
         // Şimdilik sadece SUPER_ADMIN
         securityService.checkBranchAccess(existingManager.getBranch() != null ? existingManager.getBranch().getId() : null);
         securityService.checkBranchAccess(updateManagerRequestDto.getBranchId());
 
+        // e-posta değiştiyse başka bir personelde kullanılıyor mu?
+        if (!updateManagerRequestDto.getEmail().equals(existingManager.getEmail())
+                && employeeRepository.existsByEmail(updateManagerRequestDto.getEmail())) {
+            throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, updateManagerRequestDto.getEmail()));
+        }
+
         if (existingManager.getBranch() == null || !existingManager.getBranch().getId().equals(updateManagerRequestDto.getBranchId())) {
+            Long oldBranchId = existingManager.getBranch() != null ? existingManager.getBranch().getId() : null;
             Branch newBranch = branchRepository.findById(updateManagerRequestDto.getBranchId())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, updateManagerRequestDto.getBranchId().toString())));
 
@@ -146,12 +161,15 @@ public class ManagerService implements IManagerService {
             existingManager.setBranch(newBranch);
             newBranch.setManager(existingManager);
             branchRepository.save(newBranch);
+
+            log.info("Müdür şube değiştiriyor. id: {}, eski şube: {}, yeni şube: {}", id, oldBranchId, newBranch.getId());
         }
 
         // Adres dahil tüm alanlar yerinde güncellenir; yeni Address satırı açılmaz.
         managerMapper.updateManagerFromDto(updateManagerRequestDto, existingManager);
 
         Manager updatedManager = managerRepository.saveAndFlush(existingManager);
+        log.info("Müdür güncellendi. id: {}, şube: {}", updatedManager.getId(), updatedManager.getBranch().getBranchName());
         return managerMapper.toResponse(updatedManager);
     }
 
@@ -216,6 +234,9 @@ public class ManagerService implements IManagerService {
 
         managerRepository.saveAndFlush(manager);
 
+        // açık oturumlar kapatılır; aksi halde hesap geri alınınca eski refresh token'lar yeniden çalışır
+        refreshTokenService.revokeAllTokens(manager);
+
         log.info("Müdür pasife alındı. id: {}", id);
     }
 
@@ -230,6 +251,7 @@ public class ManagerService implements IManagerService {
     public ManagerResponseDto reactivateManager(ReactivateEmployeeRequestDto request, Long id) {
 
         Manager manager = getManagerEntityById(id);
+        String oldEmail = manager.getEmail();
 
         if (manager.isActive()) {
             throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_ACTIVE, id.toString()));
@@ -246,7 +268,8 @@ public class ManagerService implements IManagerService {
             throw new BaseException(new ErrorMessage(MessageType.MANAGER_ALREADY_ASSIGNED, branch.getBranchName()));
         }
 
-        if (request.getEmail() != null && !request.getEmail().equals(manager.getEmail())) {
+        // boş string mevcut e-postayı ezmesin: yalnızca dolu gönderildiyse kontrol edilir
+        if (StringUtils.hasText(request.getEmail()) && !request.getEmail().equals(manager.getEmail())) {
             if (employeeRepository.existsByEmail(request.getEmail())) {
                 throw new BaseException(new ErrorMessage(MessageType.EMAIL_ALREADY_EXISTS, request.getEmail()));
             }
@@ -275,10 +298,16 @@ public class ManagerService implements IManagerService {
 
         Manager reactivatedManager = managerRepository.saveAndFlush(manager);
 
+        // şifre sıfırlandı: bu değişiklikten önce pasife alınmış hesaplarda kalmış token'lar da kapanır
+        refreshTokenService.revokeAllTokens(reactivatedManager);
+
         branch.setManager(reactivatedManager);
         branchRepository.save(branch);
 
         log.info("Müdür yeniden işe alındı. id: {}, şube: {}", reactivatedManager.getId(), branch.getBranchName());
+        if (!oldEmail.equals(reactivatedManager.getEmail())) {
+            log.warn("Yeniden işe alımda e-posta değiştirildi. personel id: {}, eski: {}, yeni: {}", id, oldEmail, reactivatedManager.getEmail());
+        }
         mailService.sendTemporaryPassword(reactivatedManager.getEmail(), reactivatedManager.getUsername(), temporaryPassword);
         return managerMapper.toResponse(reactivatedManager);
     }
