@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
@@ -143,9 +144,27 @@ public class StockItemService implements IStockItemService {
             existingStockItem.setBranch(newBranch);
         }
 
+        // mapper'dan önce eski değerler saklanır; sonrasında entity yeni değerleri taşır
+        BigDecimal oldListPrice = existingStockItem.getListPrice();
+        Integer oldMileage = existingStockItem.getMileage();
+
         stockItemMapper.updateStockItemFromDto(updateStockItemRequestDto, existingStockItem);
 
         StockItem updatedStockItem = stockItemRepository.saveAndFlush(existingStockItem);
+
+        // BigDecimal.equals ölçeğe bakar (100.00 ≠ 100), bu yüzden compareTo
+        if (oldListPrice.compareTo(updatedStockItem.getListPrice()) != 0) {
+            log.info("Stok kalemi fiyatı değişti. stockItemId: {}, plaka: {}, eski fiyat: {}, yeni fiyat: {}",
+                    id, updatedStockItem.getPlateNumber(), oldListPrice, updatedStockItem.getListPrice());
+        }
+
+        // kilometre düşürme tipik bir sahtecilik işareti: ayrıca WARN
+        if (updatedStockItem.getMileage() < oldMileage) {
+            log.warn("Stok kaleminin kilometresi düşürüldü. stockItemId: {}, plaka: {}, eski km: {}, yeni km: {}",
+                    id, updatedStockItem.getPlateNumber(), oldMileage, updatedStockItem.getMileage());
+        }
+
+        log.info("Stok kalemi güncellendi. stockItemId: {}, plaka: {}", id, updatedStockItem.getPlateNumber());
         return stockItemMapper.toResponse(updatedStockItem);
     }
 

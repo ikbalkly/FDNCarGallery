@@ -40,6 +40,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
     @ExceptionHandler(value = {AccessDeniedException.class})
     public ResponseEntity<ApiError<?>> handleAccessDenied(AccessDeniedException exception, WebRequest request) {
+        log.warn("Yetkisiz erişim denemesi (403): {}", request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(createApiError(messageOf(MessageType.UNAUTHORIZED), request, HttpStatus.FORBIDDEN));
     }

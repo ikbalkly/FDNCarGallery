@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,6 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             apiErrorWriter.write(request, response, MessageType.PASSWORD_CHANGE_REQUIRED);
                             return;
                         }
+                        // bu istekte yazılan her log satırına kullanıcı adı düşsün
+                        MDC.put("user", username);
                     }
                 }
             } catch (ExpiredJwtException ex) {
@@ -75,6 +78,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         }
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            MDC.remove("user");
+        }
     }
 }

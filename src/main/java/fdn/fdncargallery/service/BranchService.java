@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -64,6 +65,7 @@ public class BranchService implements IBranchService {
         Branch branch = branchMapper.toEntity(createBranchRequestDto);
 
         Branch savedBranch = branchRepository.saveAndFlush(branch);
+        log.info("Yeni şube oluşturuldu. id: {}, şube: {}", savedBranch.getId(), savedBranch.getBranchName());
         return branchMapper.toResponse(savedBranch);
     }
 
@@ -75,6 +77,7 @@ public class BranchService implements IBranchService {
         securityService.checkBranchAccess(id);
 
         Branch existingBranch = getBranchEntityById(id);
+        Long oldManagerId = existingBranch.getManager() != null ? existingBranch.getManager().getId() : null;
 
         if (!existingBranch.getBranchName().equals(updateBranchRequestDto.getBranchName())
                 && branchRepository.existsByBranchName(updateBranchRequestDto.getBranchName())) {
@@ -106,6 +109,12 @@ public class BranchService implements IBranchService {
         branchMapper.updateBranchFromDto(updateBranchRequestDto, existingBranch);
 
         Branch updatedBranch = branchRepository.saveAndFlush(existingBranch);
+
+        Long newManagerId = updatedBranch.getManager() != null ? updatedBranch.getManager().getId() : null;
+        if (!Objects.equals(oldManagerId, newManagerId)) {
+            log.info("Şube müdürü değiştirildi. şube id: {}, eski müdür id: {}, yeni müdür id: {}", id, oldManagerId, newManagerId);
+        }
+        log.info("Şube güncellendi. id: {}, şube: {}", updatedBranch.getId(), updatedBranch.getBranchName());
         return branchMapper.toResponse(updatedBranch);
     }
 
@@ -124,7 +133,8 @@ public class BranchService implements IBranchService {
         }
 
         branchRepository.delete(branch);
-        log.info("Şube silindi. id: {}", id);
+        // kalıcı silme: kayıt DB'den gidiyor, şube adı sadece bu satırda kalır
+        log.info("Şube silindi. id: {}, şube: {}", id, branch.getBranchName());
     }
 
     @Transactional

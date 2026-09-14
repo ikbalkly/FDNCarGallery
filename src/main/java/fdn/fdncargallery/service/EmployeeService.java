@@ -29,6 +29,7 @@ public class EmployeeService implements IEmployeeService {
         BaseEmployee employee = employeeRepository.findByIdentityNumber(searchEmployeeRequestDto.getIdentityNumber())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.EMPLOYEE_NOT_FOUND, "Bu TC ile kayıtlı personel yok")));
 
+        log.info("TC ile personel araması yapıldı. bulunan personel id: {}", employee.getId());
         return employeeMapper.toSearchResult(employee);
     }
 }
