@@ -21,8 +21,6 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "employees")
-// Personelde @SQLRestriction YOK: deletedAt/deletedBy burada denetim izidir, kaydı
-// gizlemez. Görünürlüğü active yönetir, aksi halde yeniden işe alım kaydı bulamaz.
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "employee_type", discriminatorType = DiscriminatorType.STRING, length = 50)
 public abstract class BaseEmployee extends BaseEntity implements UserDetails {
@@ -103,10 +101,13 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         this.terminationDate = (date == null) ? LocalDate.now() : date;
     }
 
-    // yeniden işe girişte bilgileri tekrardan setler
+    // yeniden işe girişte bilgileri tekrardan setler.
+    // terminate() ayrılış izini, softDelete() silme izini bırakır; geri alırken
+    // ikisi de temizlenmeli, yoksa aktif personel silinmiş görünür.
     public void reactivate() {
         this.active = true;
         this.terminationDate = null;
+        restore();
     }
 
 
