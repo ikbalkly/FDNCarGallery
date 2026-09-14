@@ -42,7 +42,10 @@ public class RefreshTokenService implements IRefreshTokenService {
     public RefreshToken validate(String refreshToken) {
 
         RefreshToken existing = refreshTokenRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.INVALID_TOKEN, "Refresh token geçersiz")));
+                .orElseThrow(() -> {
+                    log.warn("Geçersiz refresh token ile işlem denemesi.");
+                    return new BaseException(new ErrorMessage(MessageType.INVALID_TOKEN, "Refresh token geçersiz"));
+                });
 
         if (existing.getExpiryDate().isBefore(Instant.now())) {
             // süresi dolmuş olanları siler
@@ -57,13 +60,11 @@ public class RefreshTokenService implements IRefreshTokenService {
     @Transactional
     public void logout(String refreshToken) {
 
-        long deleted = refreshTokenRepository.deleteByRefreshToken(refreshToken);
-
-        if (deleted > 0) {
-            log.info("Oturum kapatıldı.");
-        } else {
-            log.debug("Logout çağrıldı ama eşleşen refresh token yok; kullanıcı zaten çıkmış sayılıyor.");
-        }
+        refreshTokenRepository.findByRefreshToken(refreshToken).ifPresentOrElse(existing -> {
+            refreshTokenRepository.delete(existing);
+            log.info("Oturum kapatıldı. username: {}",
+                    existing.getEmployee() != null ? existing.getEmployee().getUsername() : null);
+        }, () -> log.debug("Logout çağrıldı ama eşleşen refresh token yok; kullanıcı zaten çıkmış sayılıyor."));
     }
 
     @Override
@@ -76,5 +77,13 @@ public class RefreshTokenService implements IRefreshTokenService {
         RefreshToken rotated = createRefreshToken(owner);
         log.debug("Refresh token yenilendi. username: {}", owner.getUsername());
         return rotated;
+    }
+
+    @Override
+    @Transactional
+    public void revokeAllTokens(BaseEmployee employee) {
+
+        long deleted = refreshTokenRepository.deleteByEmployee(employee);
+        log.info("Personelin tüm oturumları kapatıldı. username: {}, kapatılan oturum: {}", employee.getUsername(), deleted);
     }
 }

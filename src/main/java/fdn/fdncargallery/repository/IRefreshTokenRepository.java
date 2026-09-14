@@ -1,5 +1,6 @@
 package fdn.fdncargallery.repository;
 
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ public interface IRefreshTokenRepository extends JpaRepository<RefreshToken, Lon
     Optional<RefreshToken> findByRefreshToken(String refreshToken);
 
     long deleteByRefreshToken(String refreshToken);
+
+    long deleteByEmployee(BaseEmployee employee);
 }

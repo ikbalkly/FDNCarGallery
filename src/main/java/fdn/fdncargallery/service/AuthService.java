@@ -51,20 +51,22 @@ public class AuthService implements IAuthService {
             String accessToken = jwtService.generateToken(employee);
             RefreshToken savedRefreshToken = refreshTokenService.createRefreshToken(employee);
 
+            log.info("Başarılı giriş. username: {}", employee.getUsername());
             return new AuthResponse(accessToken, savedRefreshToken.getRefreshToken(), employee.isFirstLogin());
 
         } catch (DisabledException e) {
-            log.warn("Pasif hesapla giriş denemesi. username: {}", authRequest.getUsername());
+            log.warn("Pasif hesapla giriş denemesi. username: {}", sanitizeForLog(authRequest.getUsername()));
             throw new BaseException(new ErrorMessage(MessageType.ACCOUNT_DISABLED, null));
 
         } catch (BadCredentialsException e) {
+            log.warn("Hatalı giriş denemesi. username: {}", sanitizeForLog(authRequest.getUsername()));
             throw new BaseException(new ErrorMessage(MessageType.BAD_CREDENTIALS, null));
 
         } catch (BaseException e) {
             throw e;
 
         } catch (Exception e) {
-            log.error("Giriş sırasında beklenmeyen hata. username: {}", authRequest.getUsername(), e);
+            log.error("Giriş sırasında beklenmeyen hata. username: {}", sanitizeForLog(authRequest.getUsername()), e);
             throw new BaseException(new ErrorMessage(MessageType.GENERAL_EXCEPTION, null));
         }
     }
@@ -105,6 +107,7 @@ public class AuthService implements IAuthService {
         BaseEmployee currentEmployee = securityService.getCurrentEmployee();
 
         if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), currentEmployee.getPassword())) {
+            log.warn("Şifre değiştirme reddedildi, mevcut şifre hatalı. username: {}", currentEmployee.getUsername());
             throw new BaseException(new ErrorMessage(MessageType.BAD_CREDENTIALS, "Mevcut şifre hatalı."));
         }
 
@@ -120,8 +123,15 @@ public class AuthService implements IAuthService {
         currentEmployee.setFirstLogin(false);
         employeeRepository.save(currentEmployee);
 
+        // şifre değişince bütün cihazlardaki oturumlar kapanır: sızmış bir refresh token yeni şifreyle çalışmaya devam etmesin.
+        // bu cihazın token'ı da silinir; access token dolunca (en fazla 15 dk) yeniden giriş gerekir
+        refreshTokenService.revokeAllTokens(currentEmployee);
+
         log.info("Şifre değiştirildi. username: {}", currentEmployee.getUsername());
     }
 
+    private String sanitizeForLog(String value) {
+        return value == null ? null : value.replaceAll("[\\r\\n]", "_");
+    }
 
 }

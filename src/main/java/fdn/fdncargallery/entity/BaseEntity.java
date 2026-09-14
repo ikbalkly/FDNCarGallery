@@ -48,6 +48,11 @@ public abstract class BaseEntity {
         this.deletedBy = actor;
     }
 
+    public void restore() {
+        this.deletedAt = null;
+        this.deletedBy = null;
+    }
+
     public boolean isDeleted() {
         return deletedAt != null;
     }

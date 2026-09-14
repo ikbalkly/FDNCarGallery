@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class CreateSalesRepRequestDto extends CreateEmployeeRequestDto {
 
-    // 0.123 veya 12.345 formatına uygun validasyon
     @NotNull(message = "Komisyon oranı zorunludur")
     @DecimalMin(value = "0.000", message = "Komisyon oranı negatif olamaz")
     @DecimalMax(value = "100.000", message = "Komisyon oranı %100'den büyük olamaz")

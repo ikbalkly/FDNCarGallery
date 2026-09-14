@@ -19,21 +19,12 @@ public class EmployeeResponseDto extends BaseEntityResponseDto {
 
     private String name;
     private String surname;
-    private String identityNumber;
     private String phoneNumber;
-    private BigDecimal baseSalary;
-
+    private String email;
     private AddressResponseDto address;
-
     private Long branchId;
     private String branchName;
-
-    private String username;
-    private String email;
-    private Role role;
-    private boolean firstLogin;
     private boolean active;
-
     private LocalDate hireDate;
     private LocalDate terminationDate;
 

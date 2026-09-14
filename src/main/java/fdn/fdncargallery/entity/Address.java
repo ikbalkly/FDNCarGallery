@@ -54,7 +54,7 @@ public class Address {
     public String getFullAddress() {
         return Stream.of(
                         neighborhood == null ? null : neighborhood + " Mah.",
-                        street == null ? null : street + " Sok.",
+                        street == null ? null : street,
                         buildingName,
                         buildingNo == null ? null : "No: " + buildingNo,
                         doorNo == null ? null : "D: " + doorNo,
