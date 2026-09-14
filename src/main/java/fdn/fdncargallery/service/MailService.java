@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class MailService {
 
-    private static final String TEMPORARY_PASSWORd_SUBJECT = "FDN Car Gallery - Hesabınız oluşturuldu";
+    private static final String TEMPORARY_PASSWORD_SUBJECT = "FDN Car Gallery - Hesabınız oluşturuldu";
 
     private static final String TEMPORARY_PASSWORD_BODY = """
             Merhaba,
@@ -36,7 +36,7 @@ public class MailService {
     private String from;
 
     public void sendTemporaryPassword(String to, String username, String temporaryPassword) {
-        sendAfterCommit(to, TEMPORARY_PASSWORd_SUBJECT, TEMPORARY_PASSWORD_BODY.formatted(username, temporaryPassword));
+        sendAfterCommit(to, TEMPORARY_PASSWORD_SUBJECT, TEMPORARY_PASSWORD_BODY.formatted(username, temporaryPassword));
     }
 
     private void sendAfterCommit(String to, String subject, String body) {
