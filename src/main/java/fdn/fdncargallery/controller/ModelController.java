@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/models")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN')")
+@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN','MANAGER')")
 public class ModelController implements IModelController {
 
     private final IModelService modelService;

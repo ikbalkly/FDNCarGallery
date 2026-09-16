@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/employees")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN')")
+@PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN','MANAGER')")
 public class EmployeeController implements IEmployeeController {
 
     private final IEmployeeService employeeService;
