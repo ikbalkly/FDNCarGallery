@@ -1,14 +1,14 @@
 package fdn.fdncargallery.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.SQLRestriction;
 import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Table(name = "branches")
-@SQLRestriction("deleted_at is null")
+// @SQLRestriction YOK: filtre ilişki yüklenirken de uygulanıyor ve kapatılmış şubeye
+// bağlı personel/stok kaydı açılamaz hale geliyordu. Görünürlük sorgularda yönetilir.
 @Getter
 @Setter
 @NoArgsConstructor

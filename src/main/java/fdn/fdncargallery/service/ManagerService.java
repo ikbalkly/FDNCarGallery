@@ -65,7 +65,7 @@ public class ManagerService implements IManagerService {
         securityService.checkBranchAccess(createManagerRequestDto.getBranchId());
 
         // requestden gelen dto içerindeki branchId alanı db'de var mı? yoksa hata fırlatır
-        Branch branch = branchRepository.findById(createManagerRequestDto.getBranchId())
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(createManagerRequestDto.getBranchId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, createManagerRequestDto.getBranchId().toString())));
         // eğer şubedeki manager alanı doluysa "zaten müdür atanmış" uyarısı döner
         if (branch.getManager() != null) {
@@ -145,7 +145,7 @@ public class ManagerService implements IManagerService {
 
         if (existingManager.getBranch() == null || !existingManager.getBranch().getId().equals(updateManagerRequestDto.getBranchId())) {
             Long oldBranchId = existingManager.getBranch() != null ? existingManager.getBranch().getId() : null;
-            Branch newBranch = branchRepository.findById(updateManagerRequestDto.getBranchId())
+            Branch newBranch = branchRepository.findByIdAndDeletedAtIsNull(updateManagerRequestDto.getBranchId())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, updateManagerRequestDto.getBranchId().toString())));
 
             // Hedef şubenin müdürü doluysa taşımaya izin verme: bir şubede tek müdür.
@@ -260,7 +260,7 @@ public class ManagerService implements IManagerService {
         // Şube admini yalnızca kendi şubesine personel geri alabilir.
         securityService.checkBranchAccess(request.getBranchId());
 
-        Branch branch = branchRepository.findById(request.getBranchId())
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(request.getBranchId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
 
         // Bir şubede tek müdür olabilir

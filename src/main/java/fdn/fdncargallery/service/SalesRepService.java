@@ -54,7 +54,7 @@ public class SalesRepService implements ISalesRepService {
         securityService.checkBranchAccess(requestDto.getBranchId());
 
         // requestDto'dan gönderilen branchid var mı?
-        Branch branch = branchRepository.findById(requestDto.getBranchId())
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(requestDto.getBranchId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, requestDto.getBranchId().toString())));
 
         // bu tc ile aktif bir employee kaydı var mı?
@@ -155,7 +155,7 @@ public class SalesRepService implements ISalesRepService {
 
         // şube değiştiyse yeni şubeyi DB'den çek
         if (existingSalesRep.getBranch() == null || !existingSalesRep.getBranch().getId().equals(requestDto.getBranchId())) {
-            Branch newBranch = branchRepository.findById(requestDto.getBranchId())
+            Branch newBranch = branchRepository.findByIdAndDeletedAtIsNull(requestDto.getBranchId())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, requestDto.getBranchId().toString())));
             existingSalesRep.setBranch(newBranch);
         }
@@ -212,7 +212,7 @@ public class SalesRepService implements ISalesRepService {
         // yalnızca hedef şube kontrol edilir: ayrılmış personel başka şubede işe dönebilir
         securityService.checkBranchAccess(request.getBranchId());
 
-        Branch branch = branchRepository.findById(request.getBranchId())
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(request.getBranchId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
 
         // e-posta yalnızca dolu gönderildiyse ve gerçekten değiştiyse kontrol edilir; boş string mevcut e-postayı ezmesin

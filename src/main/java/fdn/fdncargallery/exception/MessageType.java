@@ -42,8 +42,8 @@ public enum MessageType {
     INVALID_EMPLOYEE_ROLE("5003", "Bu personelin rolü, yapılmak istenen işlem için uygun değil.", HttpStatus.BAD_REQUEST),
     EMPLOYEE_NOT_IN_BRANCH("5004", "Personel bu şubede görev yapmamaktadır.", HttpStatus.BAD_REQUEST),
     EMPLOYEE_NOT_ACTIVE("5005", "Bu personel pasif durumda, işleme dahil edilemez.", HttpStatus.CONFLICT),
-    BRANCH_HAS_EMPLOYEES("5006", "Şubede kayıtlı personel var, önce personelleri başka şubeye taşıyın.", HttpStatus.CONFLICT),
-    BRANCH_HAS_STOCK("5007", "Şubede kayıtlı araç var, önce araçları başka şubeye taşıyın.", HttpStatus.CONFLICT),
+    BRANCH_HAS_EMPLOYEES("5006", "Şubede aktif personel var. Şubeyi kapatmadan önce personeli başka şubeye taşıyın ya da ayrılış işlemini yapın.", HttpStatus.CONFLICT),
+    BRANCH_HAS_STOCK("5007", "Şubede satılmamış araç var. Şubeyi kapatmadan önce araçları başka şubeye taşıyın.", HttpStatus.CONFLICT),
     BRANCH_ADMIN_NOT_FOUND("5008", "Belirtilen şube yöneticisi sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     BRANCH_ADMIN_ALREADY_ASSIGNED("5009", "Bu şubenin zaten bir yöneticisi var. Yeni yönetici atamadan önce mevcut yöneticiyi görevden almalısınız.", HttpStatus.CONFLICT),
     // Bir kişinin sistemde tek personel kaydı olabilir: aynı TC ikinci bir rolde açılamaz.
