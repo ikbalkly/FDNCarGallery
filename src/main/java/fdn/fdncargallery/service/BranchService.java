@@ -4,8 +4,11 @@ import fdn.fdncargallery.dto.branch.BranchResponseDto;
 import fdn.fdncargallery.dto.branch.CreateBranchRequestDto;
 import fdn.fdncargallery.dto.branch.UpdateBranchRequestDto;
 import fdn.fdncargallery.entity.Address;
+import fdn.fdncargallery.entity.BaseEmployee;
 import fdn.fdncargallery.entity.Branch;
 import fdn.fdncargallery.entity.Manager;
+import fdn.fdncargallery.entity.StockItem;
+import fdn.fdncargallery.enums.CarStatus;
 import fdn.fdncargallery.exception.BaseException;
 import fdn.fdncargallery.exception.ErrorMessage;
 import fdn.fdncargallery.exception.MessageType;
@@ -37,7 +40,7 @@ public class BranchService implements IBranchService {
     public List<BranchResponseDto> findAllBranches() {
         // super tüm şubeleri görür. ADMIN ve MANAGER yalnızca kendi şubesini
         List<Branch> branches = securityService.isSuperAdmin()
-                ? branchRepository.findAll()
+                ? branchRepository.findAllByDeletedAtIsNull()
                 : List.of(getBranchEntityById(securityService.getCurrentBranchId()));
 
         List<BranchResponseDto> responseDtoArrayList = new ArrayList<>();
@@ -123,24 +126,52 @@ public class BranchService implements IBranchService {
     public void deleteBranch(Long id) {
         Branch branch = getBranchEntityById(id);
 
-        if (branch.getEmployees() != null && !branch.getEmployees().isEmpty()) {
-            throw new BaseException(new ErrorMessage(MessageType.DATA_INTEGRITY_VIOLATION,
-                    "Şubede kayıtlı personel var, önce personelleri başka şubeye taşıyın."));
-        }
-        if (branch.getStockItems() != null && !branch.getStockItems().isEmpty()) {
-            throw new BaseException(new ErrorMessage(MessageType.DATA_INTEGRITY_VIOLATION,
-                    "Şubede kayıtlı araç var, önce araçları başka şubeye taşıyın."));
+        // id ile gelen branchte çalışan active employee var mı?
+        boolean hasActiveEmployee = false;
+        if (branch.getEmployees() != null) {
+            for (BaseEmployee employee : branch.getEmployees()) {
+                if (employee.isActive()) {
+                    hasActiveEmployee = true;
+                    break;
+                }
+            }
         }
 
-        branchRepository.delete(branch);
-        // kalıcı silme: kayıt DB'den gidiyor, şube adı sadece bu satırda kalır
-        log.info("Şube silindi. id: {}, şube: {}", id, branch.getBranchName());
+        // active personel varsa error fırlatır
+        if (hasActiveEmployee) {
+            throw new BaseException(new ErrorMessage(MessageType.BRANCH_HAS_EMPLOYEES, branch.getBranchName()));
+        }
+
+        // şubede hala araba durumu sold olmayan kayıt var mı?
+        boolean hasUnsoldStock = false;
+        if (branch.getStockItems() != null) {
+            for (StockItem stockItem : branch.getStockItems()) {
+                if (stockItem.getStatus() != CarStatus.SOLD) {
+                    hasUnsoldStock = true;
+                    break;
+                }
+            }
+        }
+        if (hasUnsoldStock) {
+            throw new BaseException(new ErrorMessage(MessageType.BRANCH_HAS_STOCK, branch.getBranchName()));
+        }
+
+        // soft delete yapılır
+        branch.softDelete(securityService.getCurrentEmployee());
+        branchRepository.saveAndFlush(branch);
+
+        log.info("Şube kapatıldı. id: {}, şube: {}", id, branch.getBranchName());
     }
 
     @Transactional
     @Override
     public Branch getBranchEntityById(Long id) {
-        return branchRepository.findById(id)
+        Branch branch = branchRepository.findById(id)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, id.toString())));
+
+        if (branch.isDeleted()) {
+            throw new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, id.toString()));
+        }
+        return branch;
     }
 }
