@@ -62,7 +62,7 @@ public class BranchAdminService implements IBranchAdminService {
         // requesden gelen branchID, şube repoda var mı?
         // varsa o datayı getir
         // yoksa hata fırlat
-        Branch branch = branchRepository.findById(request.getBranchId())
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(request.getBranchId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
 
         // admin repoda gönderilen şube id'sinde kayıtlı admin var mı?
@@ -134,7 +134,7 @@ public class BranchAdminService implements IBranchAdminService {
         if (existing.getBranch() == null || !existing.getBranch().getId().equals(request.getBranchId())) {
             Long oldBranchId = existing.getBranch() != null ? existing.getBranch().getId() : null;
 
-            Branch targetBranch = branchRepository.findById(request.getBranchId())
+            Branch targetBranch = branchRepository.findByIdAndDeletedAtIsNull(request.getBranchId())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
 
             if (systemAdminRepository.existsActiveByRoleAndBranch(Role.BRANCH_ADMIN, targetBranch.getId())) {
@@ -227,7 +227,7 @@ public class BranchAdminService implements IBranchAdminService {
             throw new BaseException(new ErrorMessage(MessageType.EMPLOYEE_ALREADY_ACTIVE, id.toString()));
         }
 
-        Branch branch = branchRepository.findById(request.getBranchId())
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(request.getBranchId())
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND, request.getBranchId().toString())));
 
         // Şube başına tek yönetici: dönülecek şube boşta olmalı.

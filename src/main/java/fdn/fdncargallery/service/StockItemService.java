@@ -66,7 +66,7 @@ public class StockItemService implements IStockItemService {
         // Şube admini ve müdür yalnızca kendi şubesine araç girişi yapabilir.
         securityService.checkBranchAccess(targetBranchId);
 
-        Branch branch = branchRepository.findById(targetBranchId)
+        Branch branch = branchRepository.findByIdAndDeletedAtIsNull(targetBranchId)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND,
                         targetBranchId.toString())));
 
@@ -134,7 +134,7 @@ public class StockItemService implements IStockItemService {
 
         // Şube değişiyorsa hedef şube gerçekten var mı?
         if (!existingStockItem.getBranch().getId().equals(targetBranchId)) {
-            Branch newBranch = branchRepository.findById(targetBranchId)
+            Branch newBranch = branchRepository.findByIdAndDeletedAtIsNull(targetBranchId)
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.BRANCH_NOT_FOUND,
                             targetBranchId.toString())));
 
