@@ -10,6 +10,7 @@ import fdn.fdncargallery.service.interfaces.IRefreshTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,12 +30,12 @@ public class RefreshTokenService implements IRefreshTokenService {
     @Transactional
     public RefreshToken createRefreshToken(BaseEmployee employee) {
 
-            RefreshToken refreshToken = new RefreshToken();
-            refreshToken.setEmployee(employee);
-            refreshToken.setRefreshToken(UUID.randomUUID().toString());
-            refreshToken.setExpiryDate(Instant.now().plus(VALIDITY_DAYS, ChronoUnit.DAYS));
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setEmployee(employee);
+        refreshToken.setRefreshToken(UUID.randomUUID().toString());
+        refreshToken.setExpiryDate(Instant.now().plus(VALIDITY_DAYS, ChronoUnit.DAYS));
 
-            return refreshTokenRepository.save(refreshToken);
+        return refreshTokenRepository.save(refreshToken);
     }
 
     @Override
@@ -48,8 +49,8 @@ public class RefreshTokenService implements IRefreshTokenService {
                 });
 
         if (existing.getExpiryDate().isBefore(Instant.now())) {
-            // süresi dolmuş olanları siler
-            refreshTokenRepository.delete(existing);
+            // burada silinmez: exception transaction'ı geri alacağı için silme de iptal olurdu.
+            // süresi dolmuş token'ları deleteExpiredTokens her gece toplu olarak temizler
             throw new BaseException(new ErrorMessage(MessageType.REFRESH_TOKEN_EXPIRED, null));
         }
 
@@ -85,5 +86,13 @@ public class RefreshTokenService implements IRefreshTokenService {
 
         long deleted = refreshTokenRepository.deleteByEmployee(employee);
         log.info("Personelin tüm oturumları kapatıldı. username: {}, kapatılan oturum: {}", employee.getUsername(), deleted);
+    }
+
+    // her gece 03:00'te süresi dolmuş refresh token'lar silinir.
+   @Scheduled(cron = "0 0 3 * * *", zone = "Europe/Istanbul")
+    @Transactional
+    public void deleteExpiredTokens() {
+        int deleted = refreshTokenRepository.deleteAllExpired(Instant.now());
+        log.info("Süresi dolmuş refresh token temizliği yapıldı. silinen: {}", deleted);
     }
 }
