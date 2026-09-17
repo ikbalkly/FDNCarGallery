@@ -36,9 +36,9 @@ public class AuthService implements IAuthService {
     private final PasswordEncoder passwordEncoder;
 
     /*
-    * Giriş yapma metodu
-    * request'den gelen username ve password doğrulanır
-    * */
+     * Giriş yapma metodu
+     * request'den gelen username ve password doğrulanır
+     * */
     public AuthResponse login(AuthRequest authRequest) {
         try {
             authenticationManager.authenticate(
@@ -123,8 +123,8 @@ public class AuthService implements IAuthService {
         currentEmployee.setFirstLogin(false);
         employeeRepository.save(currentEmployee);
 
-        // şifre değişince bütün cihazlardaki oturumlar kapanır: sızmış bir refresh token yeni şifreyle çalışmaya devam etmesin.
-        // bu cihazın token'ı da silinir; access token dolunca (en fazla 15 dk) yeniden giriş gerekir
+        // şifre değişince bütün cihazlardaki oturumlar kapanır: refresh token'lar silinir, token sürümü artar.
+        // bu isteği yapan cihazın access token'ı da hemen geçersiz olur; yeni şifreyle tekrar giriş gerekir
         refreshTokenService.revokeAllTokens(currentEmployee);
 
         log.info("Şifre değiştirildi. username: {}", currentEmployee.getUsername());

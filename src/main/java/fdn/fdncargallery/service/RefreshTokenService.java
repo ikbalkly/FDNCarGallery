@@ -85,6 +85,9 @@ public class RefreshTokenService implements IRefreshTokenService {
     public void revokeAllTokens(BaseEmployee employee) {
 
         long deleted = refreshTokenRepository.deleteByEmployee(employee);
+        // access token'lar da geçersiz olsun: sürüm artınca filtre eski token'ları reddeder.
+        // employee çağıranın transaction'ında yüklü; değişiklik commit'te kendiliğinden kaydedilir
+        employee.invalidateTokens();
         log.info("Personelin tüm oturumları kapatıldı. username: {}, kapatılan oturum: {}", employee.getUsername(), deleted);
     }
 

@@ -59,6 +59,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             apiErrorWriter.write(request, response, MessageType.ACCOUNT_DISABLED);
                             return;
                         }
+
+                        Integer tokenVersion = jwtService.getTokenVersion(token);
+                        if (tokenVersion == null || tokenVersion != ((BaseEmployee) userDetails).getTokenVersion()) {
+                            apiErrorWriter.write(request, response, MessageType.TOKEN_REVOKED);
+                            return;
+                        }
+
                         UsernamePasswordAuthenticationToken authenticationToken =
                                 new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
 
