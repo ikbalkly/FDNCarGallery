@@ -30,6 +30,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final ApiErrorWriter apiErrorWriter;
 
+    // login, refresh ve logout access token istemez. İstemci süresi dolmuş bir Bearer başlığı
+    // gönderse bile filtre bu isteklere karışmaz; aksi halde token yenileme tam gerektiği anda 401'e takılır.
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        return requestUri.equals(SecurityConfig.LOGIN)
+                || requestUri.equals(SecurityConfig.REFRESH_TOKEN)
+                || requestUri.equals(SecurityConfig.LOGOUT);
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
