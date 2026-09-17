@@ -32,6 +32,7 @@ public class ApiErrorWriter {
 
         ApiError<String> body = new ApiError<>();
         body.setStatusCode(status.value());
+        body.setErrorCode(messageType.getCode());
         body.setException(detail);
 
         response.setStatus(status.value());

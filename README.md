@@ -283,6 +283,7 @@ Tüm hatalar `GlobalExceptionHandler` üzerinden tek tip döner:
 ```json
 {
   "statusCode": 409,
+  "errorCode": "7008",
   "exception": {
     "path": "/api/stock-items/create_stock_item",
     "creationDate": "28-08-2026 21:14:03",

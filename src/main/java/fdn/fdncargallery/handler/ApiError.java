@@ -12,6 +12,7 @@ import lombok.Setter;
 public class ApiError<E> {
 
     private Integer statusCode;
+    private String errorCode;
     private Exception<E> exception;
 
 }
