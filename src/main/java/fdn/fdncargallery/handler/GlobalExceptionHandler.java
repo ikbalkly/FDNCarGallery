@@ -36,33 +36,33 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         log.warn("İş kuralı ihlali ({}): {}", status.value(), exception.getMessage());
 
-        return ResponseEntity.status(status).body(createApiError(exception.getMessage(), request, status));
+        return ResponseEntity.status(status).body(createApiError(exception.getMessage(), messageType, request, status));
     }
     @ExceptionHandler(value = {AccessDeniedException.class})
     public ResponseEntity<ApiError<?>> handleAccessDenied(AccessDeniedException exception, WebRequest request) {
         log.warn("Yetkisiz erişim denemesi (403): {}", request.getDescription(false).substring(4));
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(createApiError(messageOf(MessageType.UNAUTHORIZED), request, HttpStatus.FORBIDDEN));
+                .body(createApiError(messageOf(MessageType.UNAUTHORIZED), MessageType.UNAUTHORIZED, request, HttpStatus.FORBIDDEN));
     }
 
     @ExceptionHandler(value = {OptimisticLockingFailureException.class})
     public ResponseEntity<ApiError<?>> handleOptimisticLock(OptimisticLockingFailureException exception, WebRequest request) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(createApiError(messageOf(MessageType.CONCURRENT_MODIFICATION), request, HttpStatus.CONFLICT));
+                .body(createApiError(messageOf(MessageType.CONCURRENT_MODIFICATION), MessageType.CONCURRENT_MODIFICATION, request, HttpStatus.CONFLICT));
     }
 
     @ExceptionHandler(value = {DataIntegrityViolationException.class})
     public ResponseEntity<ApiError<?>> handleDataIntegrityViolation(DataIntegrityViolationException exception, WebRequest request) {
         log.warn("Veri bütünlüğü ihlali: {}", exception.getMostSpecificCause().getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(createApiError(messageOf(MessageType.DATA_INTEGRITY_VIOLATION), request, HttpStatus.CONFLICT));
+                .body(createApiError(messageOf(MessageType.DATA_INTEGRITY_VIOLATION), MessageType.DATA_INTEGRITY_VIOLATION, request, HttpStatus.CONFLICT));
     }
 
     @ExceptionHandler(value = {java.lang.Exception.class})
     public ResponseEntity<ApiError<?>> handleUnexpected(java.lang.Exception exception, WebRequest request) {
         log.error("Beklenmeyen hata", exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(createApiError(messageOf(MessageType.GENERAL_EXCEPTION), request, HttpStatus.INTERNAL_SERVER_ERROR));
+                .body(createApiError(messageOf(MessageType.GENERAL_EXCEPTION), MessageType.GENERAL_EXCEPTION, request, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 map.put(fieldName, addValue(new ArrayList<>(), objectError.getDefaultMessage()));
             }
         }
-        return new ResponseEntity<>(createApiError(map, request, HttpStatus.BAD_REQUEST), headers, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(createApiError(map, MessageType.VALIDATION_ERROR, request, HttpStatus.BAD_REQUEST), headers, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -92,7 +92,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatus status = HttpStatus.valueOf(statusCode.value());
         log.warn("İstek işlenemedi ({}): {}", status.value(), exception.getMessage());
 
-        return new ResponseEntity<>(createApiError(messageOf(messageTypeFor(status)), request, status), headers, status);
+        MessageType messageType = messageTypeFor(status);
+        return new ResponseEntity<>(createApiError(messageOf(messageType), messageType, request, status), headers, status);
     }
 
     private MessageType messageTypeFor(HttpStatus status) {
@@ -112,9 +113,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ErrorMessage(messageType, null).prepareErrorMessage();
     }
 
-    public <E> ApiError<E> createApiError(E message, WebRequest webRequest, HttpStatus status) {
+    public <E> ApiError<E> createApiError(E message, MessageType messageType, WebRequest webRequest, HttpStatus status) {
         ApiError<E> apiError = new ApiError<>();
         apiError.setStatusCode(status.value());
+        apiError.setErrorCode(messageType != null ? messageType.getCode() : null);
 
         Exception<E> exception = new Exception<>();
         exception.setMessage(message);
