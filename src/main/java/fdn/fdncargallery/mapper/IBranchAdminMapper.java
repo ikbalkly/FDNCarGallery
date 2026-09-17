@@ -20,6 +20,7 @@ public interface IBranchAdminMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "firstLogin", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "tokenVersion", ignore = true)
     SystemAdmin toEntity(CreateBranchAdminRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
@@ -38,5 +39,6 @@ public interface IBranchAdminMapper {
     @Mapping(target = "hireDate", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "tokenVersion", ignore = true)
     void updateBranchAdminFromDto(UpdateBranchAdminRequestDto request, @MappingTarget SystemAdmin branchAdmin);
 }

@@ -34,6 +34,7 @@ public enum MessageType {
     // Kimlik hiç doğrulanmadı (token yok / geçersiz). UNAUTHORIZED'dan farkı:
     // orada kimlik var ama yetki yok (403), burada kimlik yok (401).
     AUTHENTICATION_REQUIRED("3011", "Bu işlem için giriş yapmanız gerekiyor.", HttpStatus.UNAUTHORIZED),
+    TOKEN_REVOKED("3012", "Oturumunuz sonlandırıldı, lütfen tekrar giriş yapın.", HttpStatus.UNAUTHORIZED),
 
     //--- 5000: Şube ve personel için gerekli kurallar
     BRANCH_NOT_FOUND("5000", "Belirtilen şube bulunamadı.", HttpStatus.NOT_FOUND),

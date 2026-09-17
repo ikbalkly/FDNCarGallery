@@ -33,6 +33,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", employee.getRole().name());
         claims.put("isFirstLogin", employee.isFirstLogin());
+        claims.put("tokenVersion", employee.getTokenVersion());
         if (employee.getBranch() != null) {
             claims.put("branchId", employee.getBranch().getId());
         }
@@ -62,6 +63,10 @@ public class JwtService {
 
     public Boolean isTokenExpired(String token) {
         return parseToken(token, Claims::getExpiration).before(new Date());
+    }
+
+    public Integer getTokenVersion(String token) {
+        return parseToken(token, claims -> claims.get("tokenVersion", Integer.class));
     }
 
     public boolean extractIsFirstLogin(String token) {

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -78,6 +79,12 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private boolean isFirstLogin = true;
 
+    // token sürümü
+    // arttırıldığında bu personele ait diğer access tokenler geçersiz olur
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int tokenVersion = 0;
+
     // adres
     @Embedded
     private Address address;
@@ -87,7 +94,7 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @JoinColumn(nullable = false)
     private Branch branch;
 
-   // hireDate null gelirse, günün tarihini setler
+    // hireDate null gelirse, günün tarihini setler
     @PrePersist
     private void applyHireDateDefault() {
         if (hireDate == null) {
@@ -110,6 +117,11 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         restore();
     }
 
+    // şifre değişikliği, pasife alma ve yeniden işe alımda artırılır; eski sürümlü access token'lar geçersiz olur.
+    // RefreshTokenService.revokeAllTokens üzerinden çağrılır, girişte çağrılmaz (diğer cihazları dışarı atardı)
+    public void invalidateTokens() {
+        this.tokenVersion++;
+    }
 
     // ad + soyad; response DTO'larında tek alan olarak dönülür
     @Transient

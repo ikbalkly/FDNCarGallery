@@ -21,6 +21,7 @@ public interface IManagerMapper {
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "firstLogin", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
+    @Mapping(target = "tokenVersion", ignore = true)
     Manager toEntity(CreateManagerRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
@@ -38,5 +39,6 @@ public interface IManagerMapper {
     @Mapping(target = "hireDate", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "tokenVersion", ignore = true)
     void updateManagerFromDto(UpdateManagerRequestDto request, @MappingTarget Manager manager);
 }
