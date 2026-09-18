@@ -75,7 +75,7 @@ public class VehicleService implements IVehicleService {
     private void checkVehicleAccess(Long vehicleId) {
 
         // Verilen vehicleId'ye ait, durumu SOLD (satılmış) olmayan ilk stok kaydını arıyor. Yani "bu araç şu an hangi şubenin stoğunda duruyor?" sorusunun cevabını arıyor
-        Long holdingBranchId = stockItemRepository.findFirstByVehicleIdAndStatusNot(vehicleId, CarStatus.SOLD)
+        Long holdingBranchId = stockItemRepository.findFirstByVehicleIdAndStatusNotAndDeletedAtIsNull(vehicleId, CarStatus.SOLD)
                 //Kayıt bulunduysa, o stok kaydının bağlı olduğu şubenin ID'sini alıyor. findFirst... bir Optional döndürdüğü için map ile içeriye giriliyor.
                 .map(stockItem -> stockItem.getBranch().getId())
                 .orElse(null);
