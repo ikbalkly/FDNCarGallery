@@ -146,7 +146,7 @@ public class BranchService implements IBranchService {
         boolean hasUnsoldStock = false;
         if (branch.getStockItems() != null) {
             for (StockItem stockItem : branch.getStockItems()) {
-                if (stockItem.getStatus() != CarStatus.SOLD) {
+                if (!stockItem.isDeleted() && stockItem.getStatus() != CarStatus.SOLD) {
                     hasUnsoldStock = true;
                     break;
                 }

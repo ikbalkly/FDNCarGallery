@@ -4,7 +4,6 @@ import fdn.fdncargallery.enums.CarCondition;
 import fdn.fdncargallery.enums.CarStatus;
 import fdn.fdncargallery.enums.WarrantyType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,8 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "stock_items")
-@SQLRestriction("deleted_at is null")
+// @SQLRestriction YOK: rezervasyon, satış, alım, bakım ve ekspertiz kayıtları stok kalemine bağlı.
+// Filtre ilişki yüklenirken de uygulandığı için silinmiş kaleme bağlı kayıt açılamazdı. Görünürlük sorgularda yönetilir.
 @Getter
 @Setter
 @NoArgsConstructor

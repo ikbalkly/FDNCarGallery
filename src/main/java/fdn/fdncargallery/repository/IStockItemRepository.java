@@ -11,11 +11,13 @@ import java.util.Optional;
 @Repository
 public interface IStockItemRepository extends JpaRepository<StockItem, Long> {
 
-    boolean existsByVehicleIdAndStatusNot(Long vehicleId, CarStatus status);
+    boolean existsByVehicleIdAndStatusNotAndDeletedAtIsNull(Long vehicleId, CarStatus status);
 
-    boolean existsByPlateNumberAndStatusNot(String plateNumber, CarStatus status);
+    boolean existsByPlateNumberAndStatusNotAndDeletedAtIsNull(String plateNumber, CarStatus status);
 
-    List<StockItem> findAllByBranchId(Long branchId);
+    List<StockItem> findAllByDeletedAtIsNull();
 
-    Optional<StockItem> findFirstByVehicleIdAndStatusNot(Long vehicleId, CarStatus status);
+    List<StockItem> findAllByBranchIdAndDeletedAtIsNull(Long branchId);
+
+    Optional<StockItem> findFirstByVehicleIdAndStatusNotAndDeletedAtIsNull(Long vehicleId, CarStatus status);
 }

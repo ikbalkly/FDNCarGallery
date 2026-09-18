@@ -74,7 +74,7 @@ public class StockItemService implements IStockItemService {
 
         //Veritabanında bu plakaya (örn: 34ABC123) sahip ve durumu SATILDI (SOLD) OLMAYAN herhangi bir kayıt var mı?
         // true dönerse elimizde bu plakaya ait bir araç var demek
-        if (stockItemRepository.existsByPlateNumberAndStatusNot(
+        if (stockItemRepository.existsByPlateNumberAndStatusNotAndDeletedAtIsNull(
                 createStockItemRequestDto.getPlateNumber(), CarStatus.SOLD)) {
             throw new BaseException(new ErrorMessage(MessageType.PLATE_ALREADY_IN_STOCK,
                     createStockItemRequestDto.getPlateNumber()));
@@ -126,7 +126,7 @@ public class StockItemService implements IStockItemService {
 
         // Plaka DEĞİŞTİYSE aynı plakayla açık başka bir kayıt olmamalı.
         if (!existingStockItem.getPlateNumber().equals(updateStockItemRequestDto.getPlateNumber())
-                && stockItemRepository.existsByPlateNumberAndStatusNot(
+                && stockItemRepository.existsByPlateNumberAndStatusNotAndDeletedAtIsNull(
                         updateStockItemRequestDto.getPlateNumber(), CarStatus.SOLD)) {
             throw new BaseException(new ErrorMessage(MessageType.PLATE_ALREADY_IN_STOCK,
                     updateStockItemRequestDto.getPlateNumber()));
@@ -174,7 +174,7 @@ public class StockItemService implements IStockItemService {
 
         StockItem stockItem = getStockItemEntityById(id);
 
-        // Şube admini ve müdür başka şubenin aracını göremez.
+        // Super admin dışındaki roller başka şubenin aracını göremez.
         securityService.checkBranchAccess(stockItem.getBranch().getId());
 
         return stockItemMapper.toResponse(stockItem);
@@ -184,10 +184,10 @@ public class StockItemService implements IStockItemService {
     @Override
     public List<StockItemResponseDto> findAllStockItems() {
 
-        // SUPER_ADMIN tüm stoğu; BRANCH_ADMIN ve MANAGER yalnızca kendi şubesininkini görür.
+        // SUPER_ADMIN tüm stoğu; BRANCH_ADMIN, MANAGER ve SALES_REP yalnızca kendi şubesininkini görür.
         List<StockItem> stockItems = securityService.isSuperAdmin()
-                ? stockItemRepository.findAll()
-                : stockItemRepository.findAllByBranchId(securityService.getCurrentBranchId());
+                ? stockItemRepository.findAllByDeletedAtIsNull()
+                : stockItemRepository.findAllByBranchIdAndDeletedAtIsNull(securityService.getCurrentBranchId());
 
         return stockItems.stream()
                 .map(stockItemMapper::toResponse)
@@ -211,15 +211,22 @@ public class StockItemService implements IStockItemService {
                     "Yalnızca satışta (AVAILABLE) olan bir stok kalemi silinebilir. Mevcut durum: " + stockItem.getStatus()));
         }
 
-        stockItemRepository.delete(stockItem);
+        // kalıcı silme yok: kalem geçmişte kalır, kimin sildiği denetim izine yazılır
+        stockItem.softDelete(securityService.getCurrentEmployee());
+        stockItemRepository.saveAndFlush(stockItem);
 
         log.info("Stok kalemi silindi. stockItemId: {}, plaka: {}", id, stockItem.getPlateNumber());
     }
 
     @Override
     public StockItem getStockItemEntityById(Long id) {
-        return stockItemRepository.findById(id)
+        StockItem stockItem = stockItemRepository.findById(id)
                 .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.STOCK_ITEM_NOT_FOUND, id.toString())));
+
+        if (stockItem.isDeleted()) {
+            throw new BaseException(new ErrorMessage(MessageType.STOCK_ITEM_NOT_FOUND, id.toString()));
+        }
+        return stockItem;
     }
 
     private Long resolveTargetBranchId(Long requestedBranchId) {
@@ -240,7 +247,7 @@ public class StockItemService implements IStockItemService {
 
         return vehicleRepository.findByVin(vin)
                 .map(existingVehicle -> {
-                    if (stockItemRepository.existsByVehicleIdAndStatusNot(existingVehicle.getId(), CarStatus.SOLD)) {
+                    if (stockItemRepository.existsByVehicleIdAndStatusNotAndDeletedAtIsNull(existingVehicle.getId(), CarStatus.SOLD)) {
                         throw new BaseException(new ErrorMessage(MessageType.VEHICLE_ALREADY_IN_STOCK, vin));
                     }
                     log.info("Mevcut araç yeniden stoğa alınıyor. vin: {}, vehicleId: {}", vin, existingVehicle.getId());
