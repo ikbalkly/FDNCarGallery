@@ -34,11 +34,13 @@ public class StockItemController implements IStockItemController {
         return ResponseEntity.ok(stockItemService.updateStockItem(updateStockItemRequestDto, id));
     }
 
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN','BRANCH_ADMIN','MANAGER','SALES_REP')")
     @GetMapping("/list_stock_item/{id}")
     public ResponseEntity<StockItemResponseDto> findStockItemById(@PathVariable Long id) {
         return ResponseEntity.ok(stockItemService.findStockItemById(id));
     }
 
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN','BRANCH_ADMIN','MANAGER','SALES_REP')")
     @GetMapping("/list_stock_item")
     public ResponseEntity<List<StockItemResponseDto>> findAllStockItems() {
         return ResponseEntity.ok(stockItemService.findAllStockItems());
