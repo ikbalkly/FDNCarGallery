@@ -141,9 +141,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
         branchAdmin.setUsername(username);
         branchAdmin.setEmail(BRANCH_ADMIN_EMAIL);
-        branchAdmin.setPassword(passwordEncoder.encode(temporaryPassword));
+        branchAdmin.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
         branchAdmin.setRole(Role.BRANCH_ADMIN);
-        branchAdmin.setFirstLogin(true);
 
         systemAdminRepository.save(branchAdmin);
 

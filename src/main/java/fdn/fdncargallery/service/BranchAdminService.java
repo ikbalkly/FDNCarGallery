@@ -101,9 +101,8 @@ public class BranchAdminService implements IBranchAdminService {
 
         // e-posta mapper tarafından DTO'dan geliyor; geri kalan kimlik alanları sunucuda üretilir
         branchAdmin.setUsername(username);
-        branchAdmin.setPassword(passwordEncoder.encode(temporaryPassword));
+        branchAdmin.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
         branchAdmin.setRole(Role.BRANCH_ADMIN);
-        branchAdmin.setFirstLogin(true);
 
         SystemAdmin savedBranchAdmin = systemAdminRepository.saveAndFlush(branchAdmin);
 
@@ -268,8 +267,7 @@ public class BranchAdminService implements IBranchAdminService {
 
         // yeni şifre üret
         String temporaryPassword = UUID.randomUUID().toString();
-        branchAdmin.setPassword(passwordEncoder.encode(temporaryPassword));
-        branchAdmin.setFirstLogin(true);
+        branchAdmin.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
 
         SystemAdmin reactivated = systemAdminRepository.saveAndFlush(branchAdmin);
 

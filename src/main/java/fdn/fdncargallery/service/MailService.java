@@ -28,8 +28,9 @@ public class MailService {
             
             Kullanıcı adı : %s
             Geçici şifre : %s
-            
+
             İlk girişte sistem sizden bu şifreyi değiştirmenizi isteyecektir.
+            Bu geçici şifre 24 saat içinde geçerliliğini yitirir; bu süre içinde giriş yapıp şifrenizi değiştirmezseniz yöneticinizden yeni bir geçici şifre talep etmeniz gerekir.
             Bu e-postayı beklemiyorsanız yöneticinizle iletişime geçiniz.
             """;
 
