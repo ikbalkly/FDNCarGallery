@@ -2,6 +2,7 @@ package fdn.fdncargallery.controller;
 
 import fdn.fdncargallery.controller.interfaces.IEmployeeController;
 import fdn.fdncargallery.dto.employee.EmployeeSearchResultDto;
+import fdn.fdncargallery.dto.employee.ResendPasswordResultDto;
 import fdn.fdncargallery.dto.employee.SearchEmployeeRequestDto;
 import fdn.fdncargallery.service.interfaces.IEmployeeService;
 import jakarta.validation.Valid;
@@ -24,5 +25,10 @@ public class EmployeeController implements IEmployeeController {
     @PostMapping("/search_employee")
     public ResponseEntity<EmployeeSearchResultDto> findEmployeeByIdentityNumber(@Valid @RequestBody SearchEmployeeRequestDto searchEmployeeRequestDto) {
         return ResponseEntity.ok(employeeService.findEmployeeByIdentityNumber(searchEmployeeRequestDto));
+    }
+
+    @PostMapping("/resend_temporary_password")
+    public ResponseEntity<ResendPasswordResultDto> resendTemporaryPassword(@Valid @RequestBody SearchEmployeeRequestDto request) {
+        return ResponseEntity.ok(employeeService.resendTemporaryPassword(request));
     }
 }

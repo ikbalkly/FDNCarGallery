@@ -160,10 +160,19 @@ public class SalesRepService implements ISalesRepService {
             existingSalesRep.setBranch(newBranch);
         }
 
+        // mapper üzerine yazmadan önce alınır
+        String oldEmail = existingSalesRep.getEmail();
+
         salesRepMapper.updateSalesRepFromDto(requestDto, existingSalesRep);
 
         SalesRep updatedSalesRep = salesRepRepository.saveAndFlush(existingSalesRep);
         log.info("Satış temsilcisi güncellendi. id: {}, şube: {}", updatedSalesRep.getId(), updatedSalesRep.getBranch().getBranchName());
+
+        // adres değiştirip geçici şifre yeniden gönderilmesi hesap ele geçirme yolu: iz kalsın
+        if (!oldEmail.equals(updatedSalesRep.getEmail())) {
+            log.warn("Personelin e-posta adresi değiştirildi. personel id: {}, eski: {}, yeni: {}", id, oldEmail, updatedSalesRep.getEmail());
+        }
+
         return salesRepMapper.toSalesRepResponse(updatedSalesRep);
     }
 

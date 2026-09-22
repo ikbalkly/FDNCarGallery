@@ -16,6 +16,8 @@ public class EmployeeSearchResultDto {
     private String name;
     private String surname;
     private Role role;
+    // geçici şifre yeniden gönderilmeden önce adresin doğruluğu buradan kontrol edilir
+    private String email;
     private boolean active;
     private LocalDate hireDate;
     private LocalDate terminationDate;
