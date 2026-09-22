@@ -102,8 +102,7 @@ public class ManagerService implements IManagerService {
         String temporaryPassword = UUID.randomUUID().toString();
 
         // e-posta mapper tarafından DTO'dan geliyor; geri kalan kimlik alanları sunucuda üretilir
-        manager.setPassword(passwordEncoder.encode(temporaryPassword));
-        manager.setFirstLogin(true);
+        manager.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
         manager.setUsername(username);
         manager.setRole(Role.MANAGER);
 
@@ -302,8 +301,7 @@ public class ManagerService implements IManagerService {
 
         // yeni şifre generate edilir
         String temporaryPassword = UUID.randomUUID().toString();
-        manager.setPassword(passwordEncoder.encode(temporaryPassword));
-        manager.setFirstLogin(true);
+        manager.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
 
         Manager reactivatedManager = managerRepository.saveAndFlush(manager);
 

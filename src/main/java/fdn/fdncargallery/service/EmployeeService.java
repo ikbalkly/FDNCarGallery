@@ -65,8 +65,7 @@ public class EmployeeService implements IEmployeeService {
         checkResetAllowed(caller, employee);
 
         String temporaryPassword = UUID.randomUUID().toString();
-        employee.setPassword(passwordEncoder.encode(temporaryPassword));
-        employee.setFirstLogin(true);
+        employee.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
 
         // Eski şifreyle açılmış oturumlar kapansın.
         refreshTokenService.revokeAllTokens(employee);

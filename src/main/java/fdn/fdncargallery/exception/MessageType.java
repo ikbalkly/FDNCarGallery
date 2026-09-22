@@ -36,6 +36,7 @@ public enum MessageType {
     // orada kimlik var ama yetki yok (403), burada kimlik yok (401).
     AUTHENTICATION_REQUIRED("3011", "Bu işlem için giriş yapmanız gerekiyor.", HttpStatus.UNAUTHORIZED),
     TOKEN_REVOKED("3012", "Oturumunuz sonlandırıldı, lütfen tekrar giriş yapın.", HttpStatus.UNAUTHORIZED),
+    TEMPORARY_PASSWORD_EXPIRED("3013", "Geçici şifrenizin süresi doldu. Yöneticinizden yeni bir geçici şifre talep edin.", HttpStatus.UNAUTHORIZED),
 
     //--- 5000: Şube ve personel için gerekli kurallar
     BRANCH_NOT_FOUND("5000", "Belirtilen şube bulunamadı.", HttpStatus.NOT_FOUND),
@@ -72,7 +73,6 @@ public enum MessageType {
     STOCK_ITEM_NOT_FOUND("7006", "Belirtilen stok kalemi sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     VEHICLE_ALREADY_IN_STOCK("7007", "Bu araç için halihazırda açık bir stok kaydı bulunuyor. Aynı araç aynı anda iki kez stoğa alınamaz.", HttpStatus.CONFLICT),
     PLATE_ALREADY_IN_STOCK("7008", "Bu plakayla açık bir stok kaydı bulunuyor.", HttpStatus.CONFLICT),
-    // Marka ve model referans veridir: araç kaydı sırasında oluşturulmaz, önceden tanımlı olmalıdır.
     BRAND_NOT_FOUND("7009", "Belirtilen marka sistemde tanımlı değil. Önce marka kaydını oluşturun.", HttpStatus.NOT_FOUND),
     MODEL_NOT_FOUND("7010", "Bu marka altında belirtilen model tanımlı değil. Önce model kaydını oluşturun.", HttpStatus.NOT_FOUND),
     BRAND_ALREADY_EXISTS("7011", "Bu marka zaten tanımlı.", HttpStatus.CONFLICT),
@@ -83,8 +83,7 @@ public enum MessageType {
     MANAGER_NOT_FOUND("8002", "Belirtilen manager sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     INVALID_IDENTITY_NUMBER("8003", "Kimlik numarası müşteri tipiyle uyuşmuyor. Bireysel için 11 haneli TCKN, kurumsal için 10 haneli VKN girilmelidir.", HttpStatus.BAD_REQUEST),
     CUSTOMER_ALREADY_EXISTS("8004", "Bu kimlik numarasıyla kayıtlı bir müşteri zaten var.", HttpStatus.CONFLICT),
-    // Silinmiş müşteri geri geliyor: yeni kayıt yerine mevcut kaydı geri al.
-    CUSTOMER_DELETED_RECORD_EXISTS("8005", "Bu kimlik numarasına ait silinmiş bir müşteri kaydı var. Yeni kayıt açmak yerine kaydı geri alın.", HttpStatus.CONFLICT),
+    CUSTOMER_DELETED_RECORD_EXISTS("8005", "Bu kimlik numarasına ait silinmiş bir müşteri kaydı var. Yeni kayıt açmak yerine k,TEMPORARY_PASSWORD_EXPIRED(code,message,httpStatus)aydı geri alın.", HttpStatus.CONFLICT),
     CUSTOMER_ALREADY_ACTIVE("8006", "Bu müşteri kaydı silinmemiş, geri alma yapılamaz.", HttpStatus.CONFLICT);
 
     private final String code;

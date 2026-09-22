@@ -83,8 +83,7 @@ public class SalesRepService implements ISalesRepService {
         String temporaryPassword = UUID.randomUUID().toString();
 
 
-        salesRep.setPassword(passwordEncoder.encode(temporaryPassword));
-        salesRep.setFirstLogin(true);
+        salesRep.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
         salesRep.setUsername(username);
         salesRep.setRole(Role.SALES_REP);
 
@@ -251,8 +250,7 @@ public class SalesRepService implements ISalesRepService {
 
         // yeni geçici şifre
         String temporaryPassword = UUID.randomUUID().toString();
-        salesRep.setPassword(passwordEncoder.encode(temporaryPassword));
-        salesRep.setFirstLogin(true);
+        salesRep.assignTemporaryPassword(passwordEncoder.encode(temporaryPassword));
 
         SalesRep reactivatedSalesRep = salesRepRepository.saveAndFlush(salesRep);
 

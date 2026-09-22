@@ -23,10 +23,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService implements IAuthService {
+
+    private static final int TEMPORARY_PASSWORD_VALIDITY_HOURS = 24;
 
     private final AuthenticationManager authenticationManager;
     private final IEmployeeRepository employeeRepository;
@@ -47,6 +51,11 @@ public class AuthService implements IAuthService {
 
             BaseEmployee employee = employeeRepository.findByUsername(authRequest.getUsername())
                     .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.NO_RECORD_EXIST, authRequest.getUsername())));
+
+            if (isTemporaryPasswordExpired(employee)) {
+                log.warn("Süresi dolmuş geçici şifreyle giriş denemesi. username: {}", employee.getUsername());
+                throw new BaseException(new ErrorMessage(MessageType.TEMPORARY_PASSWORD_EXPIRED, null));
+            }
 
             String accessToken = jwtService.generateToken(employee);
             RefreshToken savedRefreshToken = refreshTokenService.createRefreshToken(employee);
@@ -128,6 +137,12 @@ public class AuthService implements IAuthService {
         refreshTokenService.revokeAllTokens(currentEmployee);
 
         log.info("Şifre değiştirildi. username: {}", currentEmployee.getUsername());
+    }
+
+    private boolean isTemporaryPasswordExpired(BaseEmployee employee) {
+        return employee.isFirstLogin()
+                && employee.getTemporaryPasswordIssuedAt() != null
+                && employee.getTemporaryPasswordIssuedAt().plusHours(TEMPORARY_PASSWORD_VALIDITY_HOURS).isBefore(LocalDateTime.now());
     }
 
     private String sanitizeForLog(String value) {

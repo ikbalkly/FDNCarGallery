@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -79,6 +80,10 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private boolean isFirstLogin = true;
 
+    // geçici şifrenin verildiği an; isFirstLogin=true olduğu sürece süre kontrolü bunu kullanır
+    @Column(name = "temporary_password_issued_at")
+    private LocalDateTime temporaryPasswordIssuedAt;
+
     // token sürümü
     // arttırıldığında bu personele ait diğer access tokenler geçersiz olur
     @Column(nullable = false)
@@ -100,6 +105,13 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         if (hireDate == null) {
             hireDate = LocalDate.now();
         }
+    }
+
+    // geçici şifre atar: create/resend akışlarının hepsi bunu çağırır, süre sayacı burada sıfırlanır
+    public void assignTemporaryPassword(String encodedPassword) {
+        this.password = encodedPassword;
+        this.isFirstLogin = true;
+        this.temporaryPasswordIssuedAt = LocalDateTime.now();
     }
 
     // işten çıkma durumunda bilgileri setler
