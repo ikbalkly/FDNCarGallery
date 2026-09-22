@@ -11,6 +11,7 @@ public enum MessageType {
     GENERAL_EXCEPTION("1000", "Bir hata oluştu.", HttpStatus.INTERNAL_SERVER_ERROR),
     VALIDATION_ERROR("1001", "Girilen veriler kurallara uymuyor.", HttpStatus.BAD_REQUEST),
     UNSUPPORTED_OPERATION("1002", "Desteklenmeyen işlem.", HttpStatus.METHOD_NOT_ALLOWED),
+    MAIL_SEND_FAILED("1003", "E-posta gönderilemedi. Adresi kontrol edip tekrar deneyin.", HttpStatus.SERVICE_UNAVAILABLE),
 
     // --- 2000: Veritabanı ve Kayıt Hataları (CRUD) ---
     NO_RECORD_EXIST("2000", "Kayıt bulunamadı.", HttpStatus.NOT_FOUND),

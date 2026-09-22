@@ -165,11 +165,20 @@ public class ManagerService implements IManagerService {
             log.info("Müdür şube değiştiriyor. id: {}, eski şube: {}, yeni şube: {}", id, oldBranchId, newBranch.getId());
         }
 
+        // mapper üzerine yazmadan önce alınır
+        String oldEmail = existingManager.getEmail();
+
         // Adres dahil tüm alanlar yerinde güncellenir; yeni Address satırı açılmaz.
         managerMapper.updateManagerFromDto(updateManagerRequestDto, existingManager);
 
         Manager updatedManager = managerRepository.saveAndFlush(existingManager);
         log.info("Müdür güncellendi. id: {}, şube: {}", updatedManager.getId(), updatedManager.getBranch().getBranchName());
+
+        // adres değiştirip geçici şifre yeniden gönderilmesi hesap ele geçirme yolu: iz kalsın
+        if (!oldEmail.equals(updatedManager.getEmail())) {
+            log.warn("Personelin e-posta adresi değiştirildi. personel id: {}, eski: {}, yeni: {}", id, oldEmail, updatedManager.getEmail());
+        }
+
         return managerMapper.toResponse(updatedManager);
     }
 

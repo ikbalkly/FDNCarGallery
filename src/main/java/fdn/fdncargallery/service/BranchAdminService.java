@@ -145,11 +145,20 @@ public class BranchAdminService implements IBranchAdminService {
             log.info("Şube yöneticisi şube değiştiriyor. id: {}, eski şube: {}, yeni şube: {}", id, oldBranchId, targetBranch.getId());
         }
 
+        // mapper üzerine yazmadan önce alınır
+        String oldEmail = existing.getEmail();
+
         // Adres dahil tüm alanlar yerinde güncellenir; yeni Address satırı açılmaz.
         branchAdminMapper.updateBranchAdminFromDto(request, existing);
 
         SystemAdmin updated = systemAdminRepository.saveAndFlush(existing);
         log.info("Şube yöneticisi güncellendi. id: {}, şube: {}", updated.getId(), updated.getBranch().getBranchName());
+
+        // adres değiştirip geçici şifre yeniden gönderilmesi hesap ele geçirme yolu: iz kalsın
+        if (!oldEmail.equals(updated.getEmail())) {
+            log.warn("Personelin e-posta adresi değiştirildi. personel id: {}, eski: {}, yeni: {}", id, oldEmail, updated.getEmail());
+        }
+
         return branchAdminMapper.toResponse(updated);
     }
 
