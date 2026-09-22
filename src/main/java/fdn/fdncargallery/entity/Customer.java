@@ -2,7 +2,6 @@ package fdn.fdncargallery.entity;
 
 import fdn.fdncargallery.enums.CustomerType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "customers")
-@SQLRestriction("deleted_at is null")
 public class Customer extends BaseEntity {
 
     // müşterinin tipi ( kurumsal- bireysel)

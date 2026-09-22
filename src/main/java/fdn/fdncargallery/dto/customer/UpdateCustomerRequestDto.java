@@ -15,8 +15,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateCustomerRequestDto {
 
-    @NotNull(message = "Satılan stok kalemi (Stock Item ID) seçilmelidir")
-    private Long stockItemId;
+    @NotNull(message = "Müşteri tipi (Bireysel/Kurumsal) belirtilmelidir")
+    private CustomerType customerType;
 
     @NotBlank(message = "Kimlik / Vergi numarası boş bırakılamaz")
     @Pattern(regexp = "^[0-9]{10,11}$", message = "Kimlik numarası 11 (TCKN) veya 10 (VKN) haneli olmalıdır")
