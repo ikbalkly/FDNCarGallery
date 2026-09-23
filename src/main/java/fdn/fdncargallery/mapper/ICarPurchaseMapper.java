@@ -2,9 +2,11 @@ package fdn.fdncargallery.mapper;
 
 import fdn.fdncargallery.dto.carPurchase.CarPurchaseResponseDto;
 import fdn.fdncargallery.dto.carPurchase.CreateCarPurchaseRequestDto;
+import fdn.fdncargallery.dto.carPurchase.UpdateCarPurchaseRequestDto;
 import fdn.fdncargallery.entity.CarPurchase;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(config = IBaseMapperConfig.class)
 public interface ICarPurchaseMapper {
@@ -14,6 +16,11 @@ public interface ICarPurchaseMapper {
     @Mapping(target = "employee", ignore = true)
     CarPurchase toEntity(CreateCarPurchaseRequestDto request);
 
+    @Mapping(target = "stockItem", ignore = true)
+    @Mapping(target = "sellerCustomer", ignore = true)
+    @Mapping(target = "employee", ignore = true)
+    @Mapping(target = "purchaseDate", ignore = true)
+    void updateCarPurchaseFromDto(UpdateCarPurchaseRequestDto request, @MappingTarget CarPurchase carPurchase);
 
     // Stok kalemi ve araç bilgileri
     @Mapping(target = "stockItemId", source = "stockItem.id")
