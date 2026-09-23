@@ -19,6 +19,7 @@ public interface IBranchAdminMapper {
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "temporaryPasswordIssuedAt", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
     SystemAdmin toEntity(CreateBranchAdminRequestDto request);
@@ -36,6 +37,7 @@ public interface IBranchAdminMapper {
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "role", ignore = true)
     @Mapping(target = "firstLogin", ignore = true)
+    @Mapping(target = "temporaryPasswordIssuedAt", ignore = true)
     @Mapping(target = "hireDate", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)

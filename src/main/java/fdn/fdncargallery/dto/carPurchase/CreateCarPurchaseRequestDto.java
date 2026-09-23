@@ -1,5 +1,7 @@
 package fdn.fdncargallery.dto.carPurchase;
 
+import fdn.fdncargallery.dto.stockItem.CreateStockItemRequestDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -17,8 +19,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CreateCarPurchaseRequestDto {
 
-    @NotNull(message = "Satın alınan stok kalemi (Stock Item ID) seçilmelidir")
-    private Long stockItemId;
+    @Valid
+    @NotNull(message = "Satın alınan araç ve stok bilgileri zorunludur")
+    private CreateStockItemRequestDto stockItem;
 
     @NotNull(message = "Aracı satan müşteri (Customer ID) seçilmelidir")
     private Long sellerCustomerId;

@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,12 @@ public class VehicleService implements IVehicleService {
         Vehicle vehicle = getVehicleEntityById(id);
 
         checkVehicleAccess(id);
+
+        int maxModelYear = LocalDate.now().getYear() + 1;
+        if (updateVehicleRequestDto.getModelYear() > maxModelYear) {
+            throw new BaseException(new ErrorMessage(MessageType.VALIDATION_ERROR,
+                    "Model yılı " + maxModelYear + "'den büyük olamaz."));
+        }
 
         vehicleMapper.updateVehicleFromDto(updateVehicleRequestDto, vehicle);
 

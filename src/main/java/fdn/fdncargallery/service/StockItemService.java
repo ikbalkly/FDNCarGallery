@@ -254,6 +254,13 @@ public class StockItemService implements IStockItemService {
                     return existingVehicle;
                 })
                 .orElseGet(() -> {
+
+                    int maxModelYear = LocalDate.now().getYear() + 1;
+                    if (request.getVehicle().getModelYear() > maxModelYear) {
+                        throw new BaseException(new ErrorMessage(MessageType.VALIDATION_ERROR,
+                                "Model yılı " + maxModelYear + "'den büyük olamaz."));
+                    }
+
                     Vehicle newVehicle = vehicleMapper.toEntity(request.getVehicle());
                     newVehicle.setVin(vin);
 
