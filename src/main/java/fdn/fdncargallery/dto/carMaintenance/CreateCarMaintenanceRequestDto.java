@@ -28,6 +28,9 @@ public class CreateCarMaintenanceRequestDto {
     @NotNull(message = "Bakım başlangıç tarihi zorunludur")
     private LocalDate startDate;
 
+    @NotNull(message = "Beklenen bitiş tarihi zorunludur")
+    private LocalDate expectedEndDate;
+
     @NotNull(message = "Tahmini veya kesinleşmiş bakım ücreti zorunludur")
     @PositiveOrZero(message = "Bakım ücreti negatif olamaz")
     private BigDecimal cost;
