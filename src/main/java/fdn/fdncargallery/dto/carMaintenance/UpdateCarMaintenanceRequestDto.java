@@ -23,11 +23,10 @@ public class UpdateCarMaintenanceRequestDto {
     @NotNull(message = "Bakım tipi belirtilmelidir")
     private MaintenanceType maintenanceType;
 
-    // Bitiş tarihi girilmesi bakımın kapatılması demektir (completed = endDate != null)
-    @NotNull(message = "Bakım bitiş tarihi zorunludur")
-    private LocalDate endDate;
+    @NotNull(message = "Beklenen bitiş tarihi zorunludur")
+    private LocalDate expectedEndDate;
 
-    @NotNull(message = "Kesinleşen bakım ücreti zorunludur")
+    @NotNull(message = "Bakım ücreti zorunludur")
     @PositiveOrZero(message = "Bakım ücreti negatif olamaz")
-    private BigDecimal finalCost;
+    private BigDecimal cost;
 }

@@ -62,6 +62,7 @@ public enum MessageType {
     STOCK_ITEM_UNDER_MAINTENANCE_CANNOT_BE_SOLD("6002", "Araç şu anda bakımda olduğu için satış işlemi gerçekleştirilemez.", HttpStatus.CONFLICT),
     EXPERT_REPORT_REQUIRED("6003", "Bu aracın satış/alım işlemini tamamlamak için güncel bir ekspertiz raporu zorunludur.", HttpStatus.CONFLICT),
     EXPERT_REPORT_NOT_FOUND("6004", "Ekspertiz raporu bulunamadı.", HttpStatus.NOT_FOUND),
+    MAINTENANCE_ALREADY_COMPLETED("6005", "Bu bakım tamamlanmış, araç teslim alınmış. Kayıt üzerinde değişiklik yapılamaz.", HttpStatus.CONFLICT),
 
     // --- 7000: Araç kimliği (Vehicle) ve stok kalemi (StockItem) ---
     VEHICLE_NOT_FOUND("7000", "Belirtilen araç (VIN) sistemde bulunamadı.", HttpStatus.NOT_FOUND),

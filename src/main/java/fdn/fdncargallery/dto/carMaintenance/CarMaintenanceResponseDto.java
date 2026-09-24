@@ -19,10 +19,11 @@ public class CarMaintenanceResponseDto extends BaseEntityResponseDto {
     private String description;
     private MaintenanceType maintenanceType;
     private LocalDate startDate;
-    private LocalDate endDate;
+    private LocalDate expectedEndDate;
+    private LocalDate completedAt;
     private BigDecimal cost;
 
-    // endDate'ten türetilir, ayrı bir kolon değildir
+    // completedAt'ten türetilir, ayrı bir kolon değildir
     private boolean completed;
 
     // --- Stok kalemi ve araç özeti ---

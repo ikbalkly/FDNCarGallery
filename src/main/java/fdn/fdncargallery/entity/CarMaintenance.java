@@ -43,9 +43,12 @@ public class CarMaintenance extends BaseEntity {
     @Column(nullable = false)
     private LocalDate startDate;
 
-    // bitiş tarihi
-    @Column(nullable = true)
-    private LocalDate endDate;
+    // beklenen bitiş tarihi
+    @Column(nullable = false)
+    private LocalDate expectedEndDate;
+
+    // araç ustadan teslim alındığı gün; null ise bakım sürüyor
+    private LocalDate completedAt;
 
     // ücreti
     @Column(nullable = false, precision = 15, scale = 2)
