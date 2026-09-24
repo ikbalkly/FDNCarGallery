@@ -84,7 +84,7 @@ public enum MessageType {
     MANAGER_NOT_FOUND("8002", "Belirtilen manager sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     INVALID_IDENTITY_NUMBER("8003", "Kimlik numarası müşteri tipiyle uyuşmuyor. Bireysel için 11 haneli TCKN, kurumsal için 10 haneli VKN girilmelidir.", HttpStatus.BAD_REQUEST),
     CUSTOMER_ALREADY_EXISTS("8004", "Bu kimlik numarasıyla kayıtlı bir müşteri zaten var.", HttpStatus.CONFLICT),
-    CUSTOMER_DELETED_RECORD_EXISTS("8005", "Bu kimlik numarasına ait silinmiş bir müşteri kaydı var. Yeni kayıt açmak yerine k,TEMPORARY_PASSWORD_EXPIRED(code,message,httpStatus)aydı geri alın.", HttpStatus.CONFLICT),
+    CUSTOMER_DELETED_RECORD_EXISTS("8005", "Bu kimlik numarasına ait silinmiş bir müşteri kaydı var. Yeni kayıt açmak yerine kaydı geri alın.", HttpStatus.CONFLICT),
     CUSTOMER_ALREADY_ACTIVE("8006", "Bu müşteri kaydı silinmemiş, geri alma yapılamaz.", HttpStatus.CONFLICT);
 
     private final String code;
