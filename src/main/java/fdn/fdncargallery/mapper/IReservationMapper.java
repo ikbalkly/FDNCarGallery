@@ -4,9 +4,11 @@ import fdn.fdncargallery.dto.reservation.CreateReservationRequestDto;
 import fdn.fdncargallery.dto.reservation.ReservationResponseDto;
 import fdn.fdncargallery.dto.reservation.UpdateReservationRequestDto;
 import fdn.fdncargallery.entity.Reservation;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(config = IBaseMapperConfig.class)
 public interface IReservationMapper {
@@ -33,6 +35,7 @@ public interface IReservationMapper {
     ReservationResponseDto toResponse(Reservation reservation);
 
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "stockItem", ignore = true)
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "employee", ignore = true)

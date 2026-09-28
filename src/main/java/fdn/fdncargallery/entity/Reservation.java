@@ -1,6 +1,9 @@
 package fdn.fdncargallery.entity;
 
 import fdn.fdncargallery.enums.ReservationStatus;
+import fdn.fdncargallery.exception.BaseException;
+import fdn.fdncargallery.exception.ErrorMessage;
+import fdn.fdncargallery.exception.MessageType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -83,11 +86,10 @@ public class Reservation extends BaseEntity {
         return expirationDate != null && expirationDate.isBefore(LocalDateTime.now());
     }
 
-    private void requireActive(String action) {
+    public void requireActive(String action) {
         if (status != ReservationStatus.ACTIVE) {
-            throw new IllegalStateException(
-                    "Rezervasyon " + action + ", mevcut durumu: " + status
-                            + " (id=" + getId() + ")");
+            throw new BaseException(new ErrorMessage(MessageType.RESERVATION_NOT_ACTIVE,
+                    "Rezervasyon " + action + ", mevcut durumu: " + status + " (id=" + getId() + ")"));
         }
     }
 }

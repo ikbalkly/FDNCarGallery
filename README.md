@@ -13,8 +13,8 @@
 
 > **Bu proje aktif olarak geliştirilmektedir. Henüz tamamlanmış bir sürüm yoktur.**
 >
-> - Şu an **kimlik doğrulama, şube, personel (şube yöneticisi, müdür, satış temsilcisi), marka/model, araç stoğu, müşteri, araç alımı ve bakım** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor, ayrılan personel yeniden işe alınabiliyor.
-> - Satış, rezervasyon ve ekspertiz modüllerinin **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
+> - Şu an **kimlik doğrulama, şube, personel (şube yöneticisi, müdür, satış temsilcisi), marka/model, araç stoğu, müşteri, araç alımı, bakım ve rezervasyon** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor, ayrılan personel yeniden işe alınabiliyor.
+> - Satış ve ekspertiz modüllerinin **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
 > - API sözleşmeleri (endpoint isimleri, request/response alanları) geliştirme sürecinde **değişebilir**.
 > - Ayrıntılı durum için aşağıdaki [Yol Haritası](#-yol-haritası) bölümüne bakabilirsiniz.
 
@@ -42,7 +42,7 @@ FDN Car Gallery, birden fazla şubesi olan bir oto galerinin günlük operasyonl
 - **Personel yönetimi** — şube yöneticisi, müdür ve satış temsilcisi kayıtları; her personele otomatik kurumsal kullanıcı hesabı
 - **Stok yönetimi** — aracın galeriye girişi, şubeler arası transferi, satış durumunun takibi
 - **Müşteri yönetimi** — bireysel (TCKN) ve kurumsal (VKN) müşteri kayıtları, tüm şubelerde ortak
-- **Alım / satış süreçleri** — müşteriden araç alımı ve bakım kayıtları; satış, prim hesabı, rezervasyon ve ekspertiz *(geliştiriliyor)*
+- **Alım / satış süreçleri** — müşteriden araç alımı, bakım kayıtları ve rezervasyon; satış, prim hesabı ve ekspertiz *(geliştiriliyor)*
 
 Sistemin ayırt edici tarafı **şube bazlı yetki izolasyonu**: bir şube yöneticisi ya da müdür yalnızca kendi şubesinin personelini, aracını ve kayıtlarını görebilir; süper admin ise tüm şubelere erişir.
 
@@ -340,6 +340,17 @@ Content-Type: application/json
 
 > Yalnızca satışta (`AVAILABLE`) olan araç bakıma alınabilir; bakım açılınca araç `IN_MAINTENANCE` olur ve yalnızca `complete_car_maintenance` ile satışa döner. `expectedEndDate` aracın durumunu değiştirmez; gerçek teslim günü gövdede `completedAt` ile verilir, boşsa bugün yazılır. Tamamlanmış bakım değiştirilemez; yalnızca henüz tamamlanmamış bakım silinebilir. Satış temsilcisi yalnızca kendi açtığı bakım kayıtlarına erişir.
 
+### Rezervasyon — `/api/reservations`
+
+| Method | Uç | Erişim |
+|---|---|---|
+| `POST` | `/create_reservation` | Tüm roller |
+| `PUT` | `/update_reservation/{id}` | Tüm roller |
+| `PUT` | `/cancel_reservation/{id}` | Tüm roller |
+| `GET` | `/list_reservation` · `/list_reservation/{id}` | Tüm roller |
+
+> Yalnızca satışta (`AVAILABLE`) olan araç rezerve edilebilir; rezervasyon açılınca araç `RESERVED` olur, iptal edilince ya da süresi dolunca satışa döner. Süresi dolan rezervasyonlar her gece 03:00'te `EXPIRED` yapılır; o saate kadar cevapta `expired: true` görünür, aynı araca yeni rezervasyon açılırsa eski kayıt o anda kapatılır. Bitiş tarihi, uzatmalar dahil, rezervasyon tarihinden en fazla 30 gün sonra olabilir. Yalnızca aktif ve süresi geçmemiş rezervasyon güncellenir; aktif rezervasyon iptal edilebilir. Satış temsilcisi yalnızca kendi açtığı rezervasyonlara erişir. Silme ucu yoktur.
+
 ---
 
 ## Hata Formatı
@@ -369,6 +380,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 | `6000` | Bakım ve ekspertiz |
 | `7000` | Araç kimliği ve stok kalemi |
 | `8000` | Müşteri, adres ve müdür |
+| `9000` | Rezervasyon |
 
 ---
 
@@ -396,6 +408,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Müşteri kaydı (TCKN / VKN doğrulaması), TC ile arama ve silinen kaydı geri alma
 - [x] Araç alımı (müşteriden alımla stok girişi)
 - [x] Araç bakımı (bakıma alma, tamamlama, aracın satışa dönmesi)
+- [x] Rezervasyon (aracı tutma, iptal, gece süre dolumu, 30 gün sınırı)
 - [x] Soft delete ve silen personelin kaydı (`deletedBy`)
 - [x] Şifre değişikliği ve pasife almada oturum iptali (`tokenVersion`)
 - [x] Süresi dolmuş refresh token'ların gece temizliği
@@ -407,7 +420,6 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 ### Devam eden / planlanan
 
 - [ ] **Araç satış (SoldCar)** akışı — prim oranının satış anında dondurulması, müdür indirim limiti
-- [ ] **Rezervasyon (Reservation)** akışı
 - [ ] **Ekspertiz (ExpertReport)** modülü
 - [ ] Listeleme uçlarına sayfalama, sıralama ve filtreleme
 - [ ] Swagger / OpenAPI dokümantasyonu

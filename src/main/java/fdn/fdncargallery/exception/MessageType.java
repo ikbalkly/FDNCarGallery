@@ -85,7 +85,12 @@ public enum MessageType {
     INVALID_IDENTITY_NUMBER("8003", "Kimlik numarası müşteri tipiyle uyuşmuyor. Bireysel için 11 haneli TCKN, kurumsal için 10 haneli VKN girilmelidir.", HttpStatus.BAD_REQUEST),
     CUSTOMER_ALREADY_EXISTS("8004", "Bu kimlik numarasıyla kayıtlı bir müşteri zaten var.", HttpStatus.CONFLICT),
     CUSTOMER_DELETED_RECORD_EXISTS("8005", "Bu kimlik numarasına ait silinmiş bir müşteri kaydı var. Yeni kayıt açmak yerine kaydı geri alın.", HttpStatus.CONFLICT),
-    CUSTOMER_ALREADY_ACTIVE("8006", "Bu müşteri kaydı silinmemiş, geri alma yapılamaz.", HttpStatus.CONFLICT);
+    CUSTOMER_ALREADY_ACTIVE("8006", "Bu müşteri kaydı silinmemiş, geri alma yapılamaz.", HttpStatus.CONFLICT),
+
+    // --- 9000: Rezervasyon ---
+    RESERVATION_NOT_FOUND("9000", "Rezervasyon kaydı bulunamadı.", HttpStatus.NOT_FOUND),
+    RESERVATION_NOT_ACTIVE("9001", "Bu rezervasyon aktif değil, üzerinde işlem yapılamaz.", HttpStatus.CONFLICT),
+    STOCK_ITEM_ALREADY_RESERVED("9002", "Bu araç şu anda başka bir müşteri adına rezerve edilmiş.", HttpStatus.CONFLICT);
 
     private final String code;
     private final String message;
