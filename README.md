@@ -127,7 +127,7 @@ Kimlik bilgileri ayrı bir hesap tablosunda değil, personelin kendi satırında
 - **Refresh token** — 7 gün geçerli, veritabanında tutulur ve her yenilemede **rotate** edilir (eski token silinir). Süresi dolmuş token'lar her gece 03:00'te temizlenir.
 - **İlk giriş zorunluluğu** — hesabı yeni açılan kullanıcı, geçici şifresini değiştirmeden `/api/auth/change-password` dışındaki hiçbir uca erişemez (`JwtAuthenticationFilter` içinde uygulanır). Geçici şifre 24 saat geçerlidir; süresi dolarsa yönetici `resend_temporary_password` ile yenisini gönderir.
 - **Şube izolasyonu** — `SecurityService.checkBranchAccess()` ile şube yöneticisi, müdür ve satış temsilcisi yalnızca kendi şubesinin verisine erişir.
-- **Oturum iptali** — şifre değişikliği, geçici şifre yenileme, pasife alma ve yeniden işe alımda personelin `tokenVersion` değeri artar ve refresh token'ları silinir; eski access token'lar süresi dolmadan anında geçersizleşir.
+- **Oturum iptali** — şifre değişikliği, geçici şifre yenileme, `revoke_sessions`, `logout-all`, pasife alma ve yeniden işe alımda personelin `tokenVersion` değeri artar ve refresh token'ları silinir; eski access token'lar süresi dolmadan anında geçersizleşir.
 - Şifreler **BCrypt** ile hash'lenir; hiçbir uçta düz metin şifre saklanmaz. Yeni şifre 8–72 karakter olmalı; büyük harf, küçük harf, rakam ve özel karakter içermelidir.
 - **Loglama** — her log satırına işlemi yapan kullanıcı eklenir (giriş yapılmamış isteklerde `anonim`); loglar `logs/fdn-car-gallery.log` dosyasına yazılır ve 30 gün saklanır.
 
@@ -208,6 +208,9 @@ Tüm uçlar `Authorization: Bearer <accessToken>` başlığı bekler (auth uçla
 | `POST` | `/refresh_token` | Herkese açık |
 | `POST` | `/logout` | Herkese açık |
 | `POST` | `/change-password` | Giriş yapmış kullanıcı |
+| `POST` | `/logout-all` | Giriş yapmış kullanıcı |
+
+> `logout-all` kişinin kendi tüm oturumlarını (tüm cihazlar) kapatır, gövde almaz, başarılı yanıt `204`. `/logout` yalnızca o cihazın refresh token'ını siler; bu uç ise refresh token'a gerek duymadan hepsini siler ve isteği yapan cihazın access token'ı da geçersiz olur. Şifre değişmez; kayıp cihaz gibi durumlar içindir.
 
 ```http
 POST /api/auth/login
@@ -271,10 +274,13 @@ Content-Type: application/json
 |---|---|---|
 | `POST` | `/search_employee` | Sistem yöneticisi, şube yöneticisi, müdür |
 | `POST` | `/resend_temporary_password` | Sistem yöneticisi, şube yöneticisi, müdür |
+| `POST` | `/revoke_sessions` | Sistem yöneticisi, şube yöneticisi, müdür |
 
 > TC kimlik numarasıyla **rolden bağımsız** personel araması. Ayrılmış personelin kaydını bulup yeniden işe alım için gereken `id`'yi verir; pasif kayıtlar listeleme uçlarında görünmediği için bu uç olmadan bulunamazlar. Dönen sonuç bilinçli olarak dardır: `id`, ad, soyad, rol, `active`, işe giriş/çıkış tarihi ve şube adı — maaş, adres, iletişim ve hesap bilgileri yer almaz.
 
 > `resend_temporary_password` geçici şifre e-postası ulaşmayan ya da şifresinin süresi dolan personele yeni geçici şifre üretip gönderir (TC gövdede). Kayıtlı şifre BCrypt hash'i olduğu için eskisi gönderilemez, her seferinde yenisi üretilir. Şube yöneticisi müdüre ve satış temsilcisine, müdür yalnızca satış temsilcisine gönderebilir.
+
+> `revoke_sessions` şifreye dokunmadan personelin tüm oturumlarını kapatır (TC gövdede, başarılı yanıt `204`): refresh token'lar silinir, açık access token'lar anında `TOKEN_REVOKED` alır; şifre değişmez, e-posta gitmez. Kayıp cihaz gibi durumlar içindir. Şifre sızdıysa saldırgan bildiği şifreyle yeniden giriş yapabileceği için `resend_temporary_password` kullanılmalıdır. Yetki hiyerarşisi `resend_temporary_password` ile aynıdır.
 
 ### Müşteriler — `/api/customers`
 

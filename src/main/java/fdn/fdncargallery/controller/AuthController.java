@@ -43,4 +43,10 @@ public class AuthController implements IAuthController {
         authService.logout(refreshTokenRequestDto);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/logout-all")
+    public ResponseEntity<Void> logoutAll() {
+        authService.logoutAll();
+        return ResponseEntity.noContent().build();
+    }
 }

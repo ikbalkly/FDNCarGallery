@@ -13,4 +13,6 @@ public interface IAuthService {
     public AuthResponse refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 
     public void logout(RefreshTokenRequestDto refreshTokenRequestDto);
+
+    public void logoutAll();
 }

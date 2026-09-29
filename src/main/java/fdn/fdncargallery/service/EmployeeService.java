@@ -79,6 +79,24 @@ public class EmployeeService implements IEmployeeService {
         return new ResendPasswordResultDto(employee.getId(), employee.getEmail());
     }
 
+    @Transactional
+    @Override
+    public void revokeSessions(SearchEmployeeRequestDto request) {
+
+        BaseEmployee employee = employeeRepository.findByIdentityNumber(request.getIdentityNumber())
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.EMPLOYEE_NOT_FOUND, "Bu TC ile kayıtlı personel yok")));
+
+        BaseEmployee caller = securityService.getCurrentEmployee();
+
+        securityService.checkBranchAccess(employee.getBranch().getId());
+        checkResetAllowed(caller, employee);
+
+        refreshTokenService.revokeAllTokens(employee);
+
+        log.warn("Personelin oturumları zorla kapatıldı. personel id: {}, username: {}, isteyen: {}",
+                employee.getId(), employee.getUsername(), caller.getUsername());
+    }
+
     // Kimi açabiliyorsan onun şifresini sıfırlayabilirsin: müdür süper adminin hesabını kilitleyemesin.
     private void checkResetAllowed(BaseEmployee caller, BaseEmployee target) {
 

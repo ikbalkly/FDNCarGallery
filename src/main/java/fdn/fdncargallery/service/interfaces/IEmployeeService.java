@@ -11,4 +11,7 @@ public interface IEmployeeService {
 
     // geçici şifre e-postası ulaşmadıysa yenisini üretip gönderir
     ResendPasswordResultDto resendTemporaryPassword(SearchEmployeeRequestDto request);
+
+    // şifreye dokunmadan personelin tüm oturumlarını kapatır
+    void revokeSessions(SearchEmployeeRequestDto request);
 }
