@@ -28,9 +28,8 @@ public class AuthController implements IAuthController {
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
-        authService.changePassword(changePasswordRequestDto);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<AuthResponse> changePassword(@Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
+        return ResponseEntity.ok(authService.changePassword(changePasswordRequestDto));
     }
 
     @PostMapping("/refresh_token")

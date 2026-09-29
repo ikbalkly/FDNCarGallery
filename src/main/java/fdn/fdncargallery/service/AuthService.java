@@ -118,7 +118,7 @@ public class AuthService implements IAuthService {
 
     @Transactional
     @Override
-    public void changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
+    public AuthResponse changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
 
         BaseEmployee currentEmployee = securityService.getCurrentEmployee();
 
@@ -140,10 +140,13 @@ public class AuthService implements IAuthService {
         employeeRepository.save(currentEmployee);
 
         // şifre değişince bütün cihazlardaki oturumlar kapanır: refresh token'lar silinir, token sürümü artar.
-        // bu isteği yapan cihazın access token'ı da hemen geçersiz olur; yeni şifreyle tekrar giriş gerekir
+        // isteği yapan cihaz mevcut şifreyi doğruladığı için ona yeni token çifti verilir, yeniden giriş gerekmez
         refreshTokenService.revokeAllTokens(currentEmployee);
+        String accessToken = jwtService.generateToken(currentEmployee);
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(currentEmployee);
 
         log.info("Şifre değiştirildi. username: {}", currentEmployee.getUsername());
+        return new AuthResponse(accessToken, newRefreshToken.getRefreshToken(), currentEmployee.isFirstLogin());
     }
 
     private boolean isTemporaryPasswordExpired(BaseEmployee employee) {

@@ -210,7 +210,9 @@ Tüm uçlar `Authorization: Bearer <accessToken>` başlığı bekler (auth uçla
 | `POST` | `/change-password` | Giriş yapmış kullanıcı |
 | `POST` | `/logout-all` | Giriş yapmış kullanıcı |
 
-> `logout-all` kişinin kendi tüm oturumlarını (tüm cihazlar) kapatır, gövde almaz, başarılı yanıt `204`. `/logout` yalnızca o cihazın refresh token'ını siler; bu uç ise refresh token'a gerek duymadan hepsini siler ve isteği yapan cihazın access token'ı da geçersiz olur. Şifre değişmez; kayıp cihaz gibi durumlar içindir.
+> `change-password` başarılı olunca diğer tüm cihazlar kapanır, isteği yapan cihaza `login` ile aynı biçimde yeni access + refresh token döner (`200`). İlk girişte geçici şifresini değiştiren kullanıcı yeniden giriş yapmadan devam eder.
+
+> `logout-all` kişinin kendi tüm oturumlarını (tüm cihazlar) kapatır, gövde almaz, başarılı yanıt `204`. `/logout` yalnızca o cihazın refresh token'ını siler; bu uç ise refresh token'a gerek duymadan hepsini siler; isteği yapan cihazın access token'ı da geçersiz olur ve yeniden giriş gerekir (`change-password`'ün aksine yeni token dönmez). Şifre değişmez; kayıp cihaz gibi durumlar içindir.
 
 ```http
 POST /api/auth/login
@@ -416,7 +418,8 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Araç bakımı (bakıma alma, tamamlama, aracın satışa dönmesi)
 - [x] Rezervasyon (aracı tutma, iptal, gece süre dolumu, 30 gün sınırı)
 - [x] Soft delete ve silen personelin kaydı (`deletedBy`)
-- [x] Şifre değişikliği ve pasife almada oturum iptali (`tokenVersion`)
+- [x] Şifre değişikliği ve pasife almada oturum iptali (`tokenVersion`); şifre değişince yeni token çifti dönülmesi
+- [x] Personelin oturumlarını zorla kapatma (`revoke_sessions`) ve tüm cihazlardan çıkış (`logout-all`)
 - [x] Süresi dolmuş refresh token'ların gece temizliği
 - [x] Şifre politikası ve 24 saat geçerli geçici şifre
 - [x] Geçici şifrenin yeniden gönderilmesi
