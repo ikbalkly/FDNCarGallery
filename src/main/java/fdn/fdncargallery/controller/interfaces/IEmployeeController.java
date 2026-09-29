@@ -8,4 +8,5 @@ import org.springframework.http.ResponseEntity;
 public interface IEmployeeController {
     ResponseEntity<EmployeeSearchResultDto> findEmployeeByIdentityNumber(SearchEmployeeRequestDto searchEmployeeRequestDto);
     ResponseEntity<ResendPasswordResultDto> resendTemporaryPassword(SearchEmployeeRequestDto request);
+    ResponseEntity<Void> revokeSessions(SearchEmployeeRequestDto request);
 }

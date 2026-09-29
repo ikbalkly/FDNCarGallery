@@ -31,4 +31,10 @@ public class EmployeeController implements IEmployeeController {
     public ResponseEntity<ResendPasswordResultDto> resendTemporaryPassword(@Valid @RequestBody SearchEmployeeRequestDto request) {
         return ResponseEntity.ok(employeeService.resendTemporaryPassword(request));
     }
+
+    @PostMapping("/revoke_sessions")
+    public ResponseEntity<Void> revokeSessions(@Valid @RequestBody SearchEmployeeRequestDto request) {
+        employeeService.revokeSessions(request);
+        return ResponseEntity.noContent().build();
+    }
 }

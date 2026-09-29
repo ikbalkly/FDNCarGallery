@@ -111,6 +111,13 @@ public class AuthService implements IAuthService {
 
     @Transactional
     @Override
+    public void logoutAll() {
+        BaseEmployee currentEmployee = securityService.getCurrentEmployee();
+        refreshTokenService.revokeAllTokens(currentEmployee);
+    }
+
+    @Transactional
+    @Override
     public void changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
 
         BaseEmployee currentEmployee = securityService.getCurrentEmployee();

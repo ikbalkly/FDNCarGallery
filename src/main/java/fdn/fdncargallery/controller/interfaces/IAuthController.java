@@ -15,4 +15,6 @@ public interface IAuthController {
     public ResponseEntity<AuthResponse> refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 
     public ResponseEntity<Void> logout(RefreshTokenRequestDto refreshTokenRequestDto);
+
+    public ResponseEntity<Void> logoutAll();
 }
