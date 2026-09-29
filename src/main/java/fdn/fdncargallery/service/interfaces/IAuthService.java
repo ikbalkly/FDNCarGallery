@@ -8,7 +8,7 @@ import fdn.fdncargallery.dto.auth.RefreshTokenRequestDto;
 public interface IAuthService {
     public AuthResponse login(AuthRequest authRequest);
 
-    public void changePassword(ChangePasswordRequestDto changePasswordRequestDto);
+    public AuthResponse changePassword(ChangePasswordRequestDto changePasswordRequestDto);
 
     public AuthResponse refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 

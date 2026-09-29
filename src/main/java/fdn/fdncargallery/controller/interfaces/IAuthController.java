@@ -10,7 +10,7 @@ public interface IAuthController {
 
     public ResponseEntity<AuthResponse> login(AuthRequest authRequest);
 
-    public ResponseEntity<Void> changePassword(ChangePasswordRequestDto changePasswordRequestDto);
+    public ResponseEntity<AuthResponse> changePassword(ChangePasswordRequestDto changePasswordRequestDto);
 
     public ResponseEntity<AuthResponse> refreshToken(RefreshTokenRequestDto refreshTokenRequestDto);
 
