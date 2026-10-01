@@ -39,7 +39,7 @@ public class SalesRepController implements ISalesRepController {
     }
 
     @GetMapping("/list_allSalesRep")
-    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN', 'BRANCH_ADMIN', 'MANAGER', 'SALES_REP')")
     @Override
     public ResponseEntity<List<SalesRepResponseDto>> findAllSalesReps() {
         return ResponseEntity.ok(salesRepService.findAllSalesReps());

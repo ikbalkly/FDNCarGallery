@@ -264,7 +264,7 @@ Content-Type: application/json
 |---|---|---|
 | `POST` | `/create_salesRep` | Sistem yöneticisi, şube yöneticisi, müdür |
 | `PUT` | `/update_salesRep/{id}` | Sistem yöneticisi, şube yöneticisi, müdür |
-| `GET` | `/list_allSalesRep` | Sistem yöneticisi, şube yöneticisi, müdür |
+| `GET` | `/list_allSalesRep` | Sistem yöneticisi, şube yöneticisi, müdür, satış temsilcisi *(yalnızca kendisi)* |
 | `GET` | `/list_salesRep/{id}` | Sistem yöneticisi, şube yöneticisi, müdür, satış temsilcisi *(yalnızca kendisi)* |
 | `DELETE` | `/delete_salesRep/{id}` | Sistem yöneticisi, şube yöneticisi, müdür *(pasife alır)* |
 | `PUT` | `/reactivate_salesRep/{id}` | Sistem yöneticisi, şube yöneticisi, müdür *(pasif kaydı geri açar)* |
