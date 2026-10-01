@@ -34,7 +34,7 @@ public class CarMaintenance extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    // aracın bakım ve ekspertiz tipi
+    // aracın bakım tipi
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MaintenanceType maintenanceType;

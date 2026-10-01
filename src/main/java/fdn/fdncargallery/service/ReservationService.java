@@ -64,7 +64,7 @@ public class ReservationService implements IReservationService {
             throw new BaseException(new ErrorMessage(MessageType.STOCK_ITEM_ALREADY_RESERVED, stockItem.getId().toString()));
         }
 
-        // satılmış, bakımdaki ya da ekspertizdeki araç rezerve edilemez
+        // satılmış ya da bakımdaki araç rezerve edilemez
         if (stockItem.getStatus() != CarStatus.AVAILABLE) {
             throw new BaseException(new ErrorMessage(MessageType.STOCK_ITEM_NOT_AVAILABLE_FOR_SALE,
                     "Yalnızca satışta (AVAILABLE) olan bir araç rezerve edilebilir. Mevcut durum: " + stockItem.getStatus()));

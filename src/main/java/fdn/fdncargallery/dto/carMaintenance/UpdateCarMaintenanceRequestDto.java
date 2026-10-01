@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class UpdateCarMaintenanceRequestDto {
 
-    @NotBlank(message = "Bakım/Ekspertiz açıklaması boş bırakılamaz")
+    @NotBlank(message = "Bakım açıklaması boş bırakılamaz")
     private String description;
 
     @NotNull(message = "Bakım tipi belirtilmelidir")

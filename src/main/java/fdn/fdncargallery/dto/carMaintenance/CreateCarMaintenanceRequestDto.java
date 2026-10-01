@@ -19,7 +19,7 @@ public class CreateCarMaintenanceRequestDto {
     @NotNull(message = "Bakıma gidecek stok kalemi (Stock Item ID) seçilmelidir")
     private Long stockItemId;
 
-    @NotBlank(message = "Bakım/Ekspertiz açıklaması boş bırakılamaz")
+    @NotBlank(message = "Bakım açıklaması boş bırakılamaz")
     private String description;
 
     @NotNull(message = "Bakım tipi belirtilmelidir")

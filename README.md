@@ -14,7 +14,6 @@
 > **Bu proje aktif olarak geliştirilmektedir. Henüz tamamlanmış bir sürüm yoktur.**
 >
 > - Şu an **kimlik doğrulama, şube, personel (şube yöneticisi, müdür, satış temsilcisi), marka/model, araç stoğu, müşteri, araç alımı, bakım, rezervasyon ve satış** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor, ayrılan personel yeniden işe alınabiliyor.
-> - Ekspertiz modülünün **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
 > - API sözleşmeleri (endpoint isimleri, request/response alanları) geliştirme sürecinde **değişebilir**.
 > - Ayrıntılı durum için aşağıdaki [Yol Haritası](#-yol-haritası) bölümüne bakabilirsiniz.
 
@@ -42,7 +41,7 @@ FDN Car Gallery, birden fazla şubesi olan bir oto galerinin günlük operasyonl
 - **Personel yönetimi** — şube yöneticisi, müdür ve satış temsilcisi kayıtları; her personele otomatik kurumsal kullanıcı hesabı
 - **Stok yönetimi** — aracın galeriye girişi, şubeler arası transferi, satış durumunun takibi
 - **Müşteri yönetimi** — bireysel (TCKN) ve kurumsal (VKN) müşteri kayıtları, tüm şubelerde ortak
-- **Alım / satış süreçleri** — müşteriden araç alımı, bakım kayıtları, rezervasyon ve satış (satış anında sabitlenen prim oranı, müdür indirim limiti, iade, aylık satış geçmişi); ekspertiz *(geliştiriliyor)*
+- **Alım / satış süreçleri** — müşteriden araç alımı, bakım kayıtları, rezervasyon ve satış (satış anında sabitlenen prim oranı, müdür indirim limiti, iade, aylık satış geçmişi)
 
 Sistemin ayırt edici tarafı **şube bazlı yetki izolasyonu**: bir şube yöneticisi ya da müdür yalnızca kendi şubesinin personelini, aracını ve kayıtlarını görebilir; süper admin ise tüm şubelere erişir.
 
@@ -117,7 +116,7 @@ BaseEntity (id, createTime, updateTime, deletedAt, deletedBy)
 
 Kimlik bilgileri ayrı bir hesap tablosunda değil, personelin kendi satırında tutulur: `BaseEmployee` doğrudan `UserDetails` implement eder (`username`, `password`, `email`, `role`, `isFirstLogin`) ve `isEnabled()` `active` alanına bağlıdır. Kullanıcı adı **rol + şube + isim + tarih** formatında otomatik üretilir: `MNG_B1_IkbalK_082026`.
 
-**Diğer entity'ler:** `Branch`, `Customer`, `Brand`, `Model`, `CarPurchase`, `SoldCar`, `Reservation`, `CarMaintenance`, `ExpertReport`, `RefreshToken`. `Address` ayrı bir tablo değil, `@Embeddable` olarak personel / müşteri / şube satırına gömülür.
+**Diğer entity'ler:** `Branch`, `Customer`, `Brand`, `Model`, `CarPurchase`, `SoldCar`, `Reservation`, `CarMaintenance`, `RefreshToken`. `Address` ayrı bir tablo değil, `@Embeddable` olarak personel / müşteri / şube satırına gömülür.
 
 ---
 
@@ -396,7 +395,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 | `2000` | Veritabanı / kayıt hataları |
 | `3000` | Kimlik doğrulama, token ve şifre hataları |
 | `5000` | Şube ve personel iş kuralları |
-| `6000` | Bakım ve ekspertiz |
+| `6000` | Bakım |
 | `7000` | Araç kimliği, stok kalemi ve satış |
 | `8000` | Müşteri, adres ve müdür |
 | `9000` | Rezervasyon |
@@ -440,7 +439,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 
 ### Devam eden / planlanan
 
-- [ ] **Ekspertiz (ExpertReport)** modülü
+- [ ] Ekspertiz raporu — gerçek hayatta galeriler için zorunlu; bu sürümde bilinçli olarak kapsam dışı bırakıldı
 - [ ] Listeleme uçlarına sayfalama, sıralama ve filtreleme
 - [ ] Swagger / OpenAPI dokümantasyonu
 - [ ] Birim ve entegrasyon testleri (şu an yalnızca context testi mevcut)

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "stock_items")
-// @SQLRestriction YOK: rezervasyon, satış, alım, bakım ve ekspertiz kayıtları stok kalemine bağlı.
+// @SQLRestriction YOK: rezervasyon, satış, alım ve bakım kayıtları stok kalemine bağlı.
 // Filtre ilişki yüklenirken de uygulandığı için silinmiş kaleme bağlı kayıt açılamazdı. Görünürlük sorgularda yönetilir.
 @Getter
 @Setter
