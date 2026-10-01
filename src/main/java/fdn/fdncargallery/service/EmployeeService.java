@@ -97,6 +97,12 @@ public class EmployeeService implements IEmployeeService {
                 employee.getId(), employee.getUsername(), caller.getUsername());
     }
 
+    @Override
+    public BaseEmployee getEmployeeEntityById(Long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.EMPLOYEE_NOT_FOUND, id.toString())));
+    }
+
     // Kimi açabiliyorsan onun şifresini sıfırlayabilirsin: müdür süper adminin hesabını kilitleyemesin.
     private void checkResetAllowed(BaseEmployee caller, BaseEmployee target) {
 
