@@ -78,6 +78,7 @@ public enum MessageType {
     MODEL_NOT_FOUND("7010", "Bu marka altında belirtilen model tanımlı değil. Önce model kaydını oluşturun.", HttpStatus.NOT_FOUND),
     BRAND_ALREADY_EXISTS("7011", "Bu marka zaten tanımlı.", HttpStatus.CONFLICT),
     MODEL_ALREADY_EXISTS("7012", "Bu model, seçilen marka altında zaten tanımlı.", HttpStatus.CONFLICT),
+    DISCOUNT_LIMIT_EXCEEDED("7013", "İndirim oranı şube müdürünün izin verdiği sınırı aşıyor.", HttpStatus.BAD_REQUEST),
 
     CUSTOMER_NOT_FOUND("8000", "Belirtilen müşteri sistemde bulunamadı.", HttpStatus.NOT_FOUND),
     ADDRESS_NOT_FOUND("8001", "Adres bilgisi bulunamadı.", HttpStatus.NOT_FOUND),

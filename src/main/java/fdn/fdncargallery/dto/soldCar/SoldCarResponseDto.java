@@ -1,5 +1,6 @@
 package fdn.fdncargallery.dto.soldCar;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import fdn.fdncargallery.dto.BaseEntityResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class SoldCarResponseDto extends BaseEntityResponseDto {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime saleDate;
     private BigDecimal salePrice;
 
@@ -30,6 +32,6 @@ public class SoldCarResponseDto extends BaseEntityResponseDto {
     private String customerFullName;
     private String customerIdentityNumber;
 
-    private Long salesRepId;
-    private String salesRepFullName;
+    private Long employeeId;
+    private String employeeFullName;
 }

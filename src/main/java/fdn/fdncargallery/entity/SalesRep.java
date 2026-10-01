@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 
 @Entity
 @DiscriminatorValue("SALES_REP")
@@ -21,4 +23,22 @@ public class SalesRep extends BaseEmployee {
     // aylık toplam satış adeti
     @Column(nullable = true)
     private Long monthlySalesCount = 0L;
+
+    @Override
+    public BigDecimal commissionRateForSale() {
+        return commissionRate != null ? commissionRate : BigDecimal.ZERO;
+    }
+
+    @Override
+    public void recordSale() {
+        monthlySalesCount = (monthlySalesCount == null ? 0L : monthlySalesCount) + 1;
+    }
+
+    // geçen ayın satışı iptal edilirse sayaç ay başında zaten sıfırlanmıştır
+    @Override
+    public void revertSale(LocalDateTime saleDate) {
+        if (monthlySalesCount != null && monthlySalesCount > 0 && YearMonth.from(saleDate).equals(YearMonth.now())) {
+            monthlySalesCount--;
+        }
+    }
 }

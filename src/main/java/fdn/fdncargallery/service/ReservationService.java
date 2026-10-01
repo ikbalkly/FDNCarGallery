@@ -5,6 +5,7 @@ import fdn.fdncargallery.dto.reservation.CreateReservationRequestDto;
 import fdn.fdncargallery.dto.reservation.ReservationResponseDto;
 import fdn.fdncargallery.dto.reservation.UpdateReservationRequestDto;
 import fdn.fdncargallery.entity.BaseEmployee;
+import fdn.fdncargallery.entity.Customer;
 import fdn.fdncargallery.entity.Reservation;
 import fdn.fdncargallery.entity.StockItem;
 import fdn.fdncargallery.enums.CarStatus;
@@ -157,6 +158,29 @@ public class ReservationService implements IReservationService {
         return reservations.stream()
                 .map(reservationMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public void convertForSale(StockItem stockItem, Customer buyer) {
+
+        Reservation reservation = reservationRepository.findByStockItemIdAndStatus(stockItem.getId(), ReservationStatus.ACTIVE)
+                .orElseThrow(() -> new BaseException(new ErrorMessage(MessageType.STOCK_ITEM_ALREADY_RESERVED,
+                        "Araç rezerve görünüyor ama aktif rezervasyonu yok. stockItemId: " + stockItem.getId())));
+
+        // süresi geçmiş rezervasyon gece görevini beklemeden kapanır, araç herkese satılabilir
+        if (reservation.isExpired()) {
+            expire(reservation);
+            return;
+        }
+
+        if (!reservation.getCustomer().getId().equals(buyer.getId())) {
+            throw new BaseException(new ErrorMessage(MessageType.STOCK_ITEM_ALREADY_RESERVED,
+                    "Araç başka bir müşteri adına rezerve. Rezervasyon id: " + reservation.getId()));
+        }
+
+        reservation.markConverted();
+        log.info("Rezervasyon satışa dönüştü. id: {}, stockItemId: {}, müşteri id: {}", reservation.getId(), stockItem.getId(), buyer.getId());
     }
 
     // her gece 03:00'te bitiş saati geçmiş aktif rezervasyonlar kapanır, araçlar satışa döner

@@ -141,6 +141,17 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         return name + " " + surname;
     }
 
+    // prim oranı ve aylık satış sayacı yalnızca satış temsilcisinde var; SalesRep bu üç metodu ezer
+    public BigDecimal commissionRateForSale() {
+        return BigDecimal.ZERO;
+    }
+
+    public void recordSale() {
+    }
+
+    public void revertSale(LocalDateTime saleDate) {
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

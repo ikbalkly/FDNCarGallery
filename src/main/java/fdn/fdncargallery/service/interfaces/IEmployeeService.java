@@ -3,6 +3,7 @@ package fdn.fdncargallery.service.interfaces;
 import fdn.fdncargallery.dto.employee.EmployeeSearchResultDto;
 import fdn.fdncargallery.dto.employee.ResendPasswordResultDto;
 import fdn.fdncargallery.dto.employee.SearchEmployeeRequestDto;
+import fdn.fdncargallery.entity.BaseEmployee;
 
 public interface IEmployeeService {
 
@@ -14,4 +15,7 @@ public interface IEmployeeService {
 
     // şifreye dokunmadan personelin tüm oturumlarını kapatır
     void revokeSessions(SearchEmployeeRequestDto request);
+
+    // diğer servisler personeli rolden bağımsız olarak buradan alır
+    BaseEmployee getEmployeeEntityById(Long id);
 }
