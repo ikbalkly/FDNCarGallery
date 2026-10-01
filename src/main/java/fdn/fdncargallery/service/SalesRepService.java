@@ -116,6 +116,13 @@ public class SalesRepService implements ISalesRepService {
     @Override
     public List<SalesRepResponseDto> findAllSalesReps() {
 
+        BaseEmployee currentUser = securityService.getCurrentEmployee();
+
+        // satış temsilcisi listede yalnızca kendini görür
+        if (currentUser.getRole() == Role.SALES_REP) {
+            return List.of(salesRepMapper.toSalesRepResponse(getSalesRepEntityById(currentUser.getId())));
+        }
+
         List<SalesRep> salesReps = securityService.isSuperAdmin()
                 ? salesRepRepository.findAllByActiveTrue()
                 : salesRepRepository.findAllByBranchIdAndActiveTrue(securityService.getCurrentBranchId());
