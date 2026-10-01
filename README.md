@@ -13,8 +13,8 @@
 
 > **Bu proje aktif olarak geliştirilmektedir. Henüz tamamlanmış bir sürüm yoktur.**
 >
-> - Şu an **kimlik doğrulama, şube, personel (şube yöneticisi, müdür, satış temsilcisi), marka/model, araç stoğu, müşteri, araç alımı, bakım ve rezervasyon** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor, ayrılan personel yeniden işe alınabiliyor.
-> - Satış ve ekspertiz modüllerinin **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
+> - Şu an **kimlik doğrulama, şube, personel (şube yöneticisi, müdür, satış temsilcisi), marka/model, araç stoğu, müşteri, araç alımı, bakım, rezervasyon ve satış** modülleri çalışır durumda; yeni personele geçici şifresi e-posta ile iletiliyor, ayrılan personel yeniden işe alınabiliyor.
+> - Ekspertiz modülünün **entity / DTO / mapper katmanları hazır**, servis ve controller katmanları yazılıyor.
 > - API sözleşmeleri (endpoint isimleri, request/response alanları) geliştirme sürecinde **değişebilir**.
 > - Ayrıntılı durum için aşağıdaki [Yol Haritası](#-yol-haritası) bölümüne bakabilirsiniz.
 
@@ -42,7 +42,7 @@ FDN Car Gallery, birden fazla şubesi olan bir oto galerinin günlük operasyonl
 - **Personel yönetimi** — şube yöneticisi, müdür ve satış temsilcisi kayıtları; her personele otomatik kurumsal kullanıcı hesabı
 - **Stok yönetimi** — aracın galeriye girişi, şubeler arası transferi, satış durumunun takibi
 - **Müşteri yönetimi** — bireysel (TCKN) ve kurumsal (VKN) müşteri kayıtları, tüm şubelerde ortak
-- **Alım / satış süreçleri** — müşteriden araç alımı, bakım kayıtları ve rezervasyon; satış, prim hesabı ve ekspertiz *(geliştiriliyor)*
+- **Alım / satış süreçleri** — müşteriden araç alımı, bakım kayıtları, rezervasyon ve satış (satış anında sabitlenen prim oranı, müdür indirim limiti, iade, aylık satış geçmişi); ekspertiz *(geliştiriliyor)*
 
 Sistemin ayırt edici tarafı **şube bazlı yetki izolasyonu**: bir şube yöneticisi ya da müdür yalnızca kendi şubesinin personelini, aracını ve kayıtlarını görebilir; süper admin ise tüm şubelere erişir.
 
@@ -359,6 +359,17 @@ Content-Type: application/json
 
 > Yalnızca satışta (`AVAILABLE`) olan araç rezerve edilebilir; rezervasyon açılınca araç `RESERVED` olur, iptal edilince ya da süresi dolunca satışa döner. Süresi dolan rezervasyonlar her gece 03:00'te `EXPIRED` yapılır; o saate kadar cevapta `expired: true` görünür, aynı araca yeni rezervasyon açılırsa eski kayıt o anda kapatılır. Bitiş tarihi, uzatmalar dahil, rezervasyon tarihinden en fazla 30 gün sonra olabilir. Yalnızca aktif ve süresi geçmemiş rezervasyon güncellenir; aktif rezervasyon iptal edilebilir. Satış temsilcisi yalnızca kendi açtığı rezervasyonlara erişir. Silme ucu yoktur.
 
+### Satış — `/api/sold-cars`
+
+| Method | Uç | Erişim |
+|---|---|---|
+| `POST` | `/create_sold_car` | Tüm roller |
+| `GET` | `/list_sold_car` · `/list_sold_car/{id}` | Tüm roller |
+| `GET` | `/monthly_sales/{employeeId}` | Tüm roller |
+| `DELETE` | `/delete_sold_car/{id}` | Sistem yöneticisi, şube yöneticisi, müdür |
+
+> Satışta (`AVAILABLE`) ya da rezerve (`RESERVED`) olan araç satılabilir; bakımdaki araç `6002`, diğer durumlar `7001` döner. Rezerve araç yalnızca rezervasyonu yapan müşteriye satılır ve rezervasyon `CONVERTED` olur (başka müşteriye `9002`); süresi geçmiş rezervasyon satış sırasında kapatılır. Satış fiyatı liste fiyatının altındaysa indirim oranı aracın şubesindeki müdürün `maxDiscountRate` sınırını aşamaz (`7013`); şubede müdür yoksa indirim yapılamaz, şube yöneticisi ve sistem yöneticisi bu sınırdan muaftır. Satıcı giriş yapan kullanıcıdır; prim oranı satış anında sabitlenir ve yalnızca satış temsilcisinin satışında yazılır, diğer rollerde `0` olur. Temsilcinin aylık satış sayısı her satışta artar, her ayın 1'inde sıfırlanır. İptal (iade) aracı satışa döndürür ve satış o ay yapıldıysa temsilcinin sayısını geri alır; satışa dönüşen rezervasyon yeniden açılmaz. Satış fiyatı sonradan değiştirilemez. `monthly_sales/{employeeId}` personelin ay ay satış adedini, cirosunu ve primini satış kayıtlarından hesaplar, iptal edilen satışlar sayılmaz. Satış temsilcisi yalnızca kendi satışlarını ve geçmişini görür, satış iptal edemez; müdür ve şube yöneticisi yalnızca kendi şubesindeki personelin geçmişini, o şubede yaptığı satışlarla görür; başka şubenin personeli `403`, olmayan personel `404` döner.
+
 ---
 
 ## Hata Formatı
@@ -386,7 +397,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 | `3000` | Kimlik doğrulama, token ve şifre hataları |
 | `5000` | Şube ve personel iş kuralları |
 | `6000` | Bakım ve ekspertiz |
-| `7000` | Araç kimliği ve stok kalemi |
+| `7000` | Araç kimliği, stok kalemi ve satış |
 | `8000` | Müşteri, adres ve müdür |
 | `9000` | Rezervasyon |
 
@@ -417,6 +428,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Araç alımı (müşteriden alımla stok girişi)
 - [x] Araç bakımı (bakıma alma, tamamlama, aracın satışa dönmesi)
 - [x] Rezervasyon (aracı tutma, iptal, gece süre dolumu, 30 gün sınırı)
+- [x] Araç satışı (prim oranının satış anında sabitlenmesi, müdür indirim limiti, rezervasyonun satışa dönmesi, iade, aylık satış geçmişi)
 - [x] Soft delete ve silen personelin kaydı (`deletedBy`)
 - [x] Şifre değişikliği ve pasife almada oturum iptali (`tokenVersion`); şifre değişince yeni token çifti dönülmesi
 - [x] Personelin oturumlarını zorla kapatma (`revoke_sessions`) ve tüm cihazlardan çıkış (`logout-all`)
@@ -428,7 +440,6 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 
 ### Devam eden / planlanan
 
-- [ ] **Araç satış (SoldCar)** akışı — prim oranının satış anında dondurulması, müdür indirim limiti
 - [ ] **Ekspertiz (ExpertReport)** modülü
 - [ ] Listeleme uçlarına sayfalama, sıralama ve filtreleme
 - [ ] Swagger / OpenAPI dokümantasyonu
