@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,11 +22,12 @@ public class SoldCar extends BaseEntity {
 
     //satışı yapan personel
     @ManyToOne(fetch = FetchType.LAZY)
-    private SalesRep salesRepEmployee;
+    @JoinColumn(nullable = false)
+    private BaseEmployee employee;
 
     // satılan aracın bilgisi
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private StockItem stockItem;
 
     // Satış anındaki prim oranı DONDURULUR.
@@ -36,6 +36,7 @@ public class SoldCar extends BaseEntity {
 
     // aracı alan müşteri
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Customer customer;
 
     // satışın tarih ve saat bilgileri

@@ -10,10 +10,10 @@ import org.mapstruct.Mapping;
 public interface ISoldCarMapper {
 
     // İlişkisel nesneler, satış tarihi ve prim oranı servis katmanında set edilir.
-    // commissionRate özellikle istemciden ALINMAZ: satış anındaki oran SalesRep'ten kopyalanır.
+    // commissionRate özellikle istemciden ALINMAZ: satış anındaki oran satıcıdan kopyalanır (temsilci değilse 0).
     @Mapping(target = "stockItem", ignore = true)
     @Mapping(target = "customer", ignore = true)
-    @Mapping(target = "salesRepEmployee", ignore = true)
+    @Mapping(target = "employee", ignore = true)
     @Mapping(target = "saleDate", ignore = true)
     @Mapping(target = "commissionRate", ignore = true)
     SoldCar toEntity(CreateSoldCarRequestDto request);
@@ -30,7 +30,7 @@ public interface ISoldCarMapper {
     @Mapping(target = "customerFullName", expression = "java(soldCar.getCustomer().getFirstName() + \" \" + soldCar.getCustomer().getLastName())")
 
     // Satışı yapan personel
-    @Mapping(target = "salesRepId", source = "salesRepEmployee.id")
-    @Mapping(target = "salesRepFullName", expression = "java(soldCar.getSalesRepEmployee().getName() + \" \" + soldCar.getSalesRepEmployee().getSurname())")
+    @Mapping(target = "employeeId", source = "employee.id")
+    @Mapping(target = "employeeFullName", source = "employee.fullName")
     SoldCarResponseDto toResponse(SoldCar soldCar);
 }
