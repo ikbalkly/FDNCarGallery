@@ -22,6 +22,7 @@ import fdn.fdncargallery.utils.UsernameGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -269,4 +270,11 @@ public class SalesRepService implements ISalesRepService {
         return salesRepMapper.toSalesRepResponse(reactivatedSalesRep);
     }
 
+    // her ayın 1'inde 00:00'da temsilcilerin aylık satış sayısı sıfırlanır
+    @Scheduled(cron = "0 0 0 1 * *", zone = "Europe/Istanbul")
+    @Transactional
+    public void resetMonthlySalesCounts() {
+        int reset = salesRepRepository.resetMonthlySalesCounts();
+        log.info("Aylık satış sayıları sıfırlandı. temsilci sayısı: {}", reset);
+    }
 }
