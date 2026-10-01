@@ -56,12 +56,10 @@ public enum MessageType {
     EMPLOYEE_ALREADY_ACTIVE("5012", "Bu personel zaten aktif durumda, yeniden işe alım yapılamaz.", HttpStatus.CONFLICT),
     EMPLOYEE_ALREADY_INACTIVE("5013", "Bu personel zaten pasif durumda, ayrılış işlemi tekrarlanamaz.", HttpStatus.CONFLICT),
 
-    // --- 6000: Bakım ve ekspertiz ---
+    // --- 6000: Bakım ---
     STOCK_ITEM_ALREADY_IN_MAINTENANCE("6000", "Bu araç şu anda aktif olarak bakımda görünmektedir, yeni bakım kaydı açılamaz.", HttpStatus.CONFLICT),
     MAINTENANCE_NOT_FOUND("6001", "Araç bakım kaydı bulunamadı.", HttpStatus.NOT_FOUND),
     STOCK_ITEM_UNDER_MAINTENANCE_CANNOT_BE_SOLD("6002", "Araç şu anda bakımda olduğu için satış işlemi gerçekleştirilemez.", HttpStatus.CONFLICT),
-    EXPERT_REPORT_REQUIRED("6003", "Bu aracın satış/alım işlemini tamamlamak için güncel bir ekspertiz raporu zorunludur.", HttpStatus.CONFLICT),
-    EXPERT_REPORT_NOT_FOUND("6004", "Ekspertiz raporu bulunamadı.", HttpStatus.NOT_FOUND),
     MAINTENANCE_ALREADY_COMPLETED("6005", "Bu bakım tamamlanmış, araç teslim alınmış. Kayıt üzerinde değişiklik yapılamaz.", HttpStatus.CONFLICT),
 
     // --- 7000: Araç kimliği (Vehicle) ve stok kalemi (StockItem) ---

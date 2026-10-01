@@ -5,6 +5,5 @@ public enum CarStatus {
     SOLD, // satıldı
     IN_MAINTENANCE, // bakımda-serviste
     RESERVED, // rezerve edildi
-    IN_EXPERT, // ekspertiz sürecinde
     IN_TRANSIT // transfer halinde
 }
