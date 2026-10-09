@@ -23,6 +23,8 @@ public interface ISalesRepMapper {
     @Mapping(target = "temporaryPasswordIssuedAt", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
+    @Mapping(target = "failedLoginAttempts", ignore = true)
+    @Mapping(target = "lockedUntil", ignore = true)
     SalesRep toSalesRepEntity(CreateSalesRepRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
@@ -42,5 +44,7 @@ public interface ISalesRepMapper {
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "monthlySalesCount", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
+    @Mapping(target = "failedLoginAttempts", ignore = true)
+    @Mapping(target = "lockedUntil", ignore = true)
     void updateSalesRepFromDto(UpdateSalesRepRequestDto request, @MappingTarget SalesRep salesRep);
 }

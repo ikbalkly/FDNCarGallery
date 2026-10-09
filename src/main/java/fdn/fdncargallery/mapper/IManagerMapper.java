@@ -23,6 +23,8 @@ public interface IManagerMapper {
     @Mapping(target = "temporaryPasswordIssuedAt", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
+    @Mapping(target = "failedLoginAttempts", ignore = true)
+    @Mapping(target = "lockedUntil", ignore = true)
     Manager toEntity(CreateManagerRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
@@ -42,5 +44,7 @@ public interface IManagerMapper {
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
+    @Mapping(target = "failedLoginAttempts", ignore = true)
+    @Mapping(target = "lockedUntil", ignore = true)
     void updateManagerFromDto(UpdateManagerRequestDto request, @MappingTarget Manager manager);
 }

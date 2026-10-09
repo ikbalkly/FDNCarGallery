@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,8 @@ import java.time.LocalDateTime;
 public class AuthService implements IAuthService {
 
     private static final int TEMPORARY_PASSWORD_VALIDITY_HOURS = 24;
+    private static final int MAX_FAILED_LOGIN_ATTEMPTS = 5;
+    private static final int LOCK_DURATION_MINUTES = 15;
 
     private final AuthenticationManager authenticationManager;
     private final IEmployeeRepository employeeRepository;
@@ -57,6 +60,11 @@ public class AuthService implements IAuthService {
                 throw new BaseException(new ErrorMessage(MessageType.TEMPORARY_PASSWORD_EXPIRED, null));
             }
 
+            if (employee.getFailedLoginAttempts() > 0 || employee.getLockedUntil() != null) {
+                employee.resetFailedLogins();
+                employeeRepository.save(employee);
+            }
+
             String accessToken = jwtService.generateToken(employee);
             RefreshToken savedRefreshToken = refreshTokenService.createRefreshToken(employee);
 
@@ -67,8 +75,13 @@ public class AuthService implements IAuthService {
             log.warn("Pasif hesapla giriş denemesi. username: {}", sanitizeForLog(authRequest.getUsername()));
             throw new BaseException(new ErrorMessage(MessageType.ACCOUNT_DISABLED, null));
 
+        } catch (LockedException e) {
+            log.warn("Kilitli hesapla giriş denemesi. username: {}", sanitizeForLog(authRequest.getUsername()));
+            throw new BaseException(new ErrorMessage(MessageType.ACCOUNT_LOCKED, null));
+
         } catch (BadCredentialsException e) {
             log.warn("Hatalı giriş denemesi. username: {}", sanitizeForLog(authRequest.getUsername()));
+            registerFailedLogin(authRequest.getUsername());
             throw new BaseException(new ErrorMessage(MessageType.BAD_CREDENTIALS, null));
 
         } catch (BaseException e) {
@@ -78,6 +91,18 @@ public class AuthService implements IAuthService {
             log.error("Giriş sırasında beklenmeyen hata. username: {}", sanitizeForLog(authRequest.getUsername()), e);
             throw new BaseException(new ErrorMessage(MessageType.GENERAL_EXCEPTION, null));
         }
+    }
+
+    // sistemde olmayan kullanıcı adı için sayaç tutulmaz
+    private void registerFailedLogin(String username) {
+        employeeRepository.findByUsername(username).ifPresent(employee -> {
+            employee.registerFailedLogin(MAX_FAILED_LOGIN_ATTEMPTS, LOCK_DURATION_MINUTES);
+            employeeRepository.save(employee);
+
+            if (!employee.isAccountNonLocked()) {
+                log.warn("Hesap kilitlendi. username: {}, süre: {} dk", employee.getUsername(), LOCK_DURATION_MINUTES);
+            }
+        });
     }
 
     @Transactional

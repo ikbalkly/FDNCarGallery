@@ -90,6 +90,15 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @ColumnDefault("0")
     private int tokenVersion = 0;
 
+    // arka arkaya hatalı giriş sayısı
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int failedLoginAttempts = 0;
+
+    // hesabın kilidinin açılacağı an
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
+
     // adres
     @Embedded
     private Address address;
@@ -112,6 +121,21 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         this.password = encodedPassword;
         this.isFirstLogin = true;
         this.temporaryPasswordIssuedAt = LocalDateTime.now();
+        resetFailedLogins();
+    }
+
+    // sınıra ulaşınca hesap kilitlenir; kilit açıldığında sayım baştan başlasın diye sayaç sıfırlanır
+    public void registerFailedLogin(int maxAttempts, int lockMinutes) {
+        this.failedLoginAttempts++;
+        if (this.failedLoginAttempts >= maxAttempts) {
+            this.lockedUntil = LocalDateTime.now().plusMinutes(lockMinutes);
+            this.failedLoginAttempts = 0;
+        }
+    }
+
+    public void resetFailedLogins() {
+        this.failedLoginAttempts = 0;
+        this.lockedUntil = null;
     }
 
     // işten çıkma durumunda bilgileri setler
@@ -160,5 +184,10 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return active;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return lockedUntil == null || lockedUntil.isBefore(LocalDateTime.now());
     }
 }
