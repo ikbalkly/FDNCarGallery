@@ -127,6 +127,7 @@ Kimlik bilgileri ayrı bir hesap tablosunda değil, personelin kendi satırında
 - **İlk giriş zorunluluğu** — hesabı yeni açılan kullanıcı, geçici şifresini değiştirmeden `/api/auth/change-password` dışındaki hiçbir uca erişemez (`JwtAuthenticationFilter` içinde uygulanır). Geçici şifre 24 saat geçerlidir; süresi dolarsa yönetici `resend_temporary_password` ile yenisini gönderir.
 - **Şube izolasyonu** — `SecurityService.checkBranchAccess()` ile şube yöneticisi, müdür ve satış temsilcisi yalnızca kendi şubesinin verisine erişir.
 - **Oturum iptali** — şifre değişikliği, geçici şifre yenileme, `revoke_sessions`, `logout-all`, pasife alma ve yeniden işe alımda personelin `tokenVersion` değeri artar ve refresh token'ları silinir; eski access token'lar süresi dolmadan anında geçersizleşir.
+- **Hesap kilidi** — arka arkaya 5 hatalı şifre denemesinde hesap 15 dakika kilitlenir (`3014`, HTTP `429`); kilitliyken doğru şifre de reddedilir, açık oturumlar etkilenmez. Başarılı giriş sayacı sıfırlar; `resend_temporary_password` kilidi de kaldırır.
 - Şifreler **BCrypt** ile hash'lenir; hiçbir uçta düz metin şifre saklanmaz. Yeni şifre 8–72 karakter olmalı; büyük harf, küçük harf, rakam ve özel karakter içermelidir.
 - **Loglama** — her log satırına işlemi yapan kullanıcı eklenir (giriş yapılmamış isteklerde `anonim`); loglar `logs/fdn-car-gallery.log` dosyasına yazılır ve 30 gün saklanır.
 
@@ -434,6 +435,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Süresi dolmuş refresh token'ların gece temizliği
 - [x] Şifre politikası ve 24 saat geçerli geçici şifre
 - [x] Geçici şifrenin yeniden gönderilmesi
+- [x] Arka arkaya hatalı girişte geçici hesap kilidi
 - [x] Kullanıcı bazlı loglama
 - [x] Veritabanı bağlantı bilgilerinin ortam değişkenlerine taşınması
 

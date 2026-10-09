@@ -37,6 +37,7 @@ public enum MessageType {
     AUTHENTICATION_REQUIRED("3011", "Bu işlem için giriş yapmanız gerekiyor.", HttpStatus.UNAUTHORIZED),
     TOKEN_REVOKED("3012", "Oturumunuz sonlandırıldı, lütfen tekrar giriş yapın.", HttpStatus.UNAUTHORIZED),
     TEMPORARY_PASSWORD_EXPIRED("3013", "Geçici şifrenizin süresi doldu. Yöneticinizden yeni bir geçici şifre talep edin.", HttpStatus.UNAUTHORIZED),
+    ACCOUNT_LOCKED("3014", "Çok fazla hatalı giriş denemesi yapıldı. Hesabınız geçici olarak kilitlendi, lütfen daha sonra tekrar deneyin.", HttpStatus.TOO_MANY_REQUESTS),
 
     //--- 5000: Şube ve personel için gerekli kurallar
     BRANCH_NOT_FOUND("5000", "Belirtilen şube bulunamadı.", HttpStatus.NOT_FOUND),

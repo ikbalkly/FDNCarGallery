@@ -22,6 +22,8 @@ public interface IBranchAdminMapper {
     @Mapping(target = "temporaryPasswordIssuedAt", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
+    @Mapping(target = "failedLoginAttempts", ignore = true)
+    @Mapping(target = "lockedUntil", ignore = true)
     SystemAdmin toEntity(CreateBranchAdminRequestDto request);
 
     @Mapping(target = "branchId", source = "branch.id")
@@ -42,5 +44,7 @@ public interface IBranchAdminMapper {
     @Mapping(target = "authorities", ignore = true)
     @Mapping(target = "terminationDate", ignore = true)
     @Mapping(target = "tokenVersion", ignore = true)
+    @Mapping(target = "failedLoginAttempts", ignore = true)
+    @Mapping(target = "lockedUntil", ignore = true)
     void updateBranchAdminFromDto(UpdateBranchAdminRequestDto request, @MappingTarget SystemAdmin branchAdmin);
 }
