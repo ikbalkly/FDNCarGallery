@@ -447,12 +447,21 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Kullanıcı bazlı loglama
 - [x] Veritabanı bağlantı bilgilerinin ortam değişkenlerine taşınması
 
-### Devam eden / planlanan
+### Gelecek sürümler için
 
 - [ ] Ekspertiz raporu — gerçek hayatta galeriler için zorunlu; bu sürümde bilinçli olarak kapsam dışı bırakıldı
+- [ ] Maaş / bordro hesabı — bilinçli olarak kapsam dışı; sistem komisyon ve hedef primini aylık kayıtlarda tutar, maaşı muhasebe hesaplar
 - [ ] Listeleme uçlarına sayfalama, sıralama ve filtreleme
 - [ ] Swagger / OpenAPI dokümantasyonu
 - [ ] Birim ve entegrasyon testleri (şu an yalnızca context testi mevcut)
+- [ ] Docker ile tek komutla kurulum (`docker compose`)
+- [ ] Araç transferinde "yolda" (`IN_TRANSIT`) aşaması; şu an araç şube değiştirince doğrudan yeni şubede sayılır
+
+### Bilinen sınırlar
+
+- Rezervasyon cevabındaki `expired` alanı yalnızca tarihe bakar; iptal edilmiş ya da satışa dönmüş eski rezervasyonlar da `true` döner.
+- Personel e-postasının tekilliği büyük/küçük harfe duyarlıdır.
+- `list_branch` her şubenin personel ve araç sayısını ayrı sorgularla hesaplar; şube sayısı arttıkça yavaşlar.
 
 ---
 
