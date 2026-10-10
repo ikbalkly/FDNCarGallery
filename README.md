@@ -110,8 +110,8 @@ Böylece bir aracın geçmişi kaybolmadan, her satış dönemi ayrı ayrı rapo
 BaseEntity (id, createTime, updateTime, deletedAt, deletedBy)
 └── BaseEmployee (kimlik + iletişim + adres + şube + hesap bilgileri + işe giriş/çıkış tarihi)
     ├── SystemAdmin   → SUPER_ADMIN ve BRANCH_ADMIN rolleri
-    ├── Manager       → indirim yetkisi, şube satış hedefi, yönetim primi
-    └── SalesRep      → prim oranı, aylık satış adedi
+    ├── Manager       → indirim yetkisi (maxDiscountRate)
+    └── SalesRep      → aylık satış adedi (komisyon oranı şubeden gelir)
 ```
 
 Kimlik bilgileri ayrı bir hesap tablosunda değil, personelin kendi satırında tutulur: `BaseEmployee` doğrudan `UserDetails` implement eder (`username`, `password`, `email`, `role`, `isFirstLogin`) ve `isEnabled()` `active` alanına bağlıdır. Kullanıcı adı **rol + şube + isim + tarih** formatında otomatik üretilir: `MNG_B1_IkbalK_082026`.
@@ -238,6 +238,8 @@ Content-Type: application/json
 | `PUT` | `/update_branch/{id}` | Sistem yöneticisi, şube yöneticisi |
 | `GET` | `/list_branch` · `/list_branch/{id}` | Sistem yöneticisi, şube yöneticisi, müdür |
 | `DELETE` | `/delete_branch/{id}` | Sistem yöneticisi |
+
+> Şube, satış temsilcilerinin ücret kurallarını taşır: `commissionRate` (komisyon oranı, yüzde, 0–1 arası; `0.2` = %0,2), `monthlySalesTarget` (temsilci başına aylık araç hedefi) ve `targetBonusPerCar` (hedefi aşan araç başına prim). Üçü de isteğe bağlıdır; oran girilmemiş şubede komisyon, hedef girilmemiş şubede hedef primi verilmez. `update_branch`'ta gönderilmezlerse eski değerler korunur; hedef primini kapatmak için tutar `0` yapılır. Aynı şubedeki bütün temsilcilere aynı kurallar uygulanır, müdür bu alanları değiştiremez.
 
 ### Şube Yöneticileri — `/api/branch-admins`
 
@@ -366,9 +368,14 @@ Content-Type: application/json
 | `POST` | `/create_sold_car` | Tüm roller |
 | `GET` | `/list_sold_car` · `/list_sold_car/{id}` | Tüm roller |
 | `GET` | `/monthly_sales/{employeeId}` | Tüm roller |
+| `GET` | `/branch_monthly_sales/{branchId}/{year}/{month}` | Sistem yöneticisi, şube yöneticisi, müdür |
 | `DELETE` | `/delete_sold_car/{id}` | Sistem yöneticisi, şube yöneticisi, müdür |
 
-> Satışta (`AVAILABLE`) ya da rezerve (`RESERVED`) olan araç satılabilir; bakımdaki araç `6002`, diğer durumlar `7001` döner. Rezerve araç yalnızca rezervasyonu yapan müşteriye satılır ve rezervasyon `CONVERTED` olur (başka müşteriye `9002`); süresi geçmiş rezervasyon satış sırasında kapatılır. Satış fiyatı liste fiyatının altındaysa indirim oranı aracın şubesindeki müdürün `maxDiscountRate` sınırını aşamaz (`7013`); şubede müdür yoksa indirim yapılamaz, şube yöneticisi ve sistem yöneticisi bu sınırdan muaftır. Satıcı giriş yapan kullanıcıdır; prim oranı satış anında sabitlenir ve yalnızca satış temsilcisinin satışında yazılır, diğer rollerde `0` olur. Temsilcinin aylık satış sayısı her satışta artar, her ayın 1'inde sıfırlanır. İptal (iade) aracı satışa döndürür ve satış o ay yapıldıysa temsilcinin sayısını geri alır; satışa dönüşen rezervasyon yeniden açılmaz. Satış fiyatı sonradan değiştirilemez. `monthly_sales/{employeeId}` personelin ay ay satış adedini, cirosunu ve primini satış kayıtlarından hesaplar, iptal edilen satışlar sayılmaz. Satış temsilcisi yalnızca kendi satışlarını ve geçmişini görür, satış iptal edemez; müdür ve şube yöneticisi yalnızca kendi şubesindeki personelin geçmişini, o şubede yaptığı satışlarla görür; başka şubenin personeli `403`, olmayan personel `404` döner.
+> Satışta (`AVAILABLE`) ya da rezerve (`RESERVED`) olan araç satılabilir; bakımdaki araç `6002`, diğer durumlar `7001` döner. Rezerve araç yalnızca rezervasyonu yapan müşteriye satılır ve rezervasyon `CONVERTED` olur (başka müşteriye `9002`); süresi geçmiş rezervasyon satış sırasında kapatılır. Satış fiyatı liste fiyatının altındaysa indirim oranı aracın şubesindeki müdürün `maxDiscountRate` sınırını aşamaz (`7013`); şubede müdür yoksa indirim yapılamaz, şube yöneticisi ve sistem yöneticisi bu sınırdan muaftır. Satıcı giriş yapan kullanıcıdır; prim oranı satış anında aracın şubesinden alınıp sabitlenir ve yalnızca satış temsilcisinin satışında yazılır, diğer rollerde `0` olur. Temsilcinin aylık satış sayısı her satışta artar, her ayın 1'inde sıfırlanır. İptal (iade) aracı satışa döndürür ve satış o ay yapıldıysa temsilcinin sayısını geri alır; satışa dönüşen rezervasyon yeniden açılmaz. Satış fiyatı sonradan değiştirilemez. `monthly_sales/{employeeId}` personelin ay ay satış adedini, cirosunu ve primini satış kayıtlarından hesaplar, iptal edilen satışlar sayılmaz. Satış temsilcisi yalnızca kendi satışlarını ve geçmişini görür, satış iptal edemez; müdür ve şube yöneticisi yalnızca kendi şubesindeki personelin geçmişini, o şubede yaptığı satışlarla görür; başka şubenin personeli `403`, olmayan personel `404` döner.
+
+> **Ay kapanışı:** her ayın 1'inde 00:00'da ve uygulama her açıldığında, kapanmamış geçmiş aylar `monthly_sales_summaries` tablosuna personel + şube bazında yazılır ve bir daha değişmez; sonradan şube hedefi değişse, temsilci şube değiştirse ya da o aydaki bir satış iade edilse de kapanmış ay aynı kalır. `monthly_sales` kapanmış ayları bu tablodan, içinde bulunulan ayı satış kayıtlarından okur. Cevaptaki `targetBonus`, satış temsilcisinin bir şubede o şubenin `monthlySalesTarget` değerini aştığı her araç için şubenin `targetBonusPerCar` tutarıdır (örneğin hedef 15, tutar 2.500 TL, 17 satış → 5.000 TL); her şube kendi şubesinde yapılan satışları kendi hedefiyle değerlendirir, ayın primi şubelerin toplamıdır. Diğer rollerde ve hedefi girilmemiş şubede `0` döner.
+
+> `branch_monthly_sales` şubenin seçilen aydaki tablosunu döner: o ay şubede satış yapan her personel için adet, ciro, komisyon ve hedef primi, en çok satan üstte. Müdür ve şube yöneticisi yalnızca kendi şubesini görür (`403`); olmayan şube `404`, geçersiz ay `400` döner.
 
 ---
 
@@ -436,6 +443,7 @@ Hata kodları `MessageType` enum'ında gruplanmıştır:
 - [x] Şifre politikası ve 24 saat geçerli geçici şifre
 - [x] Geçici şifrenin yeniden gönderilmesi
 - [x] Arka arkaya hatalı girişte geçici hesap kilidi
+- [x] Ay kapanışı; şubeye göre komisyon oranı (0–1) ve hedef primi (aylık hedefi aşan satış başına)
 - [x] Kullanıcı bazlı loglama
 - [x] Veritabanı bağlantı bilgilerinin ortam değişkenlerine taşınması
 

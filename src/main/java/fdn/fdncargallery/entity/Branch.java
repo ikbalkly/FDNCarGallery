@@ -3,6 +3,7 @@ package fdn.fdncargallery.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -35,4 +36,16 @@ public class Branch extends BaseEntity {
     // şubede çalışan tüm personellerin listesi
     @OneToMany(mappedBy = "branch")
     private List<BaseEmployee> employees;
+
+    // satış temsilcilerinin komisyon oranı (yüzde, 0-1 arası) -> 0.200 = %0,2
+    @Column(name = "commission_rate", precision = 5, scale = 3)
+    private BigDecimal commissionRate;
+
+    // temsilci başına aylık satış hedefi (araç adedi)
+    @Column(name = "monthly_sales_target")
+    private Integer monthlySalesTarget;
+
+    // hedefi aşan her araç için temsilciye verilen prim
+    @Column(name = "target_bonus_per_car", precision = 15, scale = 2)
+    private BigDecimal targetBonusPerCar;
 }

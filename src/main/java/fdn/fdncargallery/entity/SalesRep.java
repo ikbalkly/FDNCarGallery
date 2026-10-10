@@ -16,17 +16,14 @@ import java.time.YearMonth;
 @EqualsAndHashCode(callSuper = true)
 public class SalesRep extends BaseEmployee {
 
-    // satış temsilcisinin prim oranı -> 12.345 gibi veya 0.123
-    @Column(nullable = true, precision = 5, scale = 3)
-    private BigDecimal commissionRate;
-
     // aylık toplam satış adeti
     @Column(nullable = true)
     private Long monthlySalesCount = 0L;
 
+    // komisyon oranı aracın satıldığı şubeden gelir; şubede oran girilmemişse komisyon yok
     @Override
-    public BigDecimal commissionRateForSale() {
-        return commissionRate != null ? commissionRate : BigDecimal.ZERO;
+    public BigDecimal commissionRateForSale(Branch branch) {
+        return branch.getCommissionRate() != null ? branch.getCommissionRate() : BigDecimal.ZERO;
     }
 
     @Override

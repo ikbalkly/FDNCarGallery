@@ -1,6 +1,7 @@
 package fdn.fdncargallery.controller;
 
 import fdn.fdncargallery.controller.interfaces.ISoldCarController;
+import fdn.fdncargallery.dto.soldCar.BranchMonthlySalesDto;
 import fdn.fdncargallery.dto.soldCar.CreateSoldCarRequestDto;
 import fdn.fdncargallery.dto.soldCar.MonthlySalesDto;
 import fdn.fdncargallery.dto.soldCar.SoldCarResponseDto;
@@ -41,6 +42,14 @@ public class SoldCarController implements ISoldCarController {
     @GetMapping("/monthly_sales/{employeeId}")
     public ResponseEntity<List<MonthlySalesDto>> findMonthlySalesByEmployee(@PathVariable Long employeeId) {
         return ResponseEntity.ok(soldCarService.findMonthlySalesByEmployee(employeeId));
+    }
+
+    @PreAuthorize("hasAnyAuthority('SUPER_ADMIN','BRANCH_ADMIN','MANAGER')")
+    @GetMapping("/branch_monthly_sales/{branchId}/{year}/{month}")
+    public ResponseEntity<List<BranchMonthlySalesDto>> findMonthlySalesByBranch(@PathVariable Long branchId,
+                                                                                @PathVariable int year,
+                                                                                @PathVariable int month) {
+        return ResponseEntity.ok(soldCarService.findMonthlySalesByBranch(branchId, year, month));
     }
 
     @PreAuthorize("hasAnyAuthority('SUPER_ADMIN','BRANCH_ADMIN','MANAGER')")

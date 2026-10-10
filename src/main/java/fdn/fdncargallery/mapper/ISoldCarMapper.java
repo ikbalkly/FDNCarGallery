@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 public interface ISoldCarMapper {
 
     // İlişkisel nesneler, satış tarihi ve prim oranı servis katmanında set edilir.
-    // commissionRate özellikle istemciden ALINMAZ: satış anındaki oran satıcıdan kopyalanır (temsilci değilse 0).
+    // commissionRate özellikle istemciden ALINMAZ: satış anındaki oran aracın şubesinden kopyalanır (temsilci değilse 0).
     @Mapping(target = "stockItem", ignore = true)
     @Mapping(target = "customer", ignore = true)
     @Mapping(target = "employee", ignore = true)

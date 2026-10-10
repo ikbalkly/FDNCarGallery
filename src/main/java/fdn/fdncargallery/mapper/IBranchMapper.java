@@ -8,6 +8,7 @@ import fdn.fdncargallery.enums.CarStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(config = IBaseMapperConfig.class, uses = {IAddressMapper.class}, imports = CarStatus.class)
 public interface IBranchMapper {
@@ -28,5 +29,8 @@ public interface IBranchMapper {
     @Mapping(target = "manager", ignore = true)
     @Mapping(target = "stockItems", ignore = true)
     @Mapping(target = "employees", ignore = true)
+    @Mapping(target = "commissionRate", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "monthlySalesTarget", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "targetBonusPerCar", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateBranchFromDto(UpdateBranchRequestDto request, @MappingTarget Branch branch);
 }
