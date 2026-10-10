@@ -1,5 +1,6 @@
 package fdn.fdncargallery.controller.interfaces;
 
+import fdn.fdncargallery.dto.soldCar.BranchMonthlySalesDto;
 import fdn.fdncargallery.dto.soldCar.CreateSoldCarRequestDto;
 import fdn.fdncargallery.dto.soldCar.MonthlySalesDto;
 import fdn.fdncargallery.dto.soldCar.SoldCarResponseDto;
@@ -16,6 +17,8 @@ public interface ISoldCarController {
     ResponseEntity<List<SoldCarResponseDto>> findAllSoldCars();
 
     ResponseEntity<List<MonthlySalesDto>> findMonthlySalesByEmployee(Long employeeId);
+
+    ResponseEntity<List<BranchMonthlySalesDto>> findMonthlySalesByBranch(Long branchId, int year, int month);
 
     ResponseEntity<Void> deleteSoldCar(Long id);
 }

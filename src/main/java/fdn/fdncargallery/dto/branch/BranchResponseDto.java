@@ -4,6 +4,8 @@ import fdn.fdncargallery.dto.BaseEntityResponseDto;
 import fdn.fdncargallery.dto.address.AddressResponseDto;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -20,4 +22,8 @@ public class BranchResponseDto extends BaseEntityResponseDto {
 
     private int totalCars;
     private int totalEmployees;
+
+    private BigDecimal commissionRate;
+    private Integer monthlySalesTarget;
+    private BigDecimal targetBonusPerCar;
 }

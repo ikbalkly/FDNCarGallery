@@ -165,8 +165,8 @@ public abstract class BaseEmployee extends BaseEntity implements UserDetails {
         return name + " " + surname;
     }
 
-    // prim oranı ve aylık satış sayacı yalnızca satış temsilcisinde var; SalesRep bu üç metodu ezer
-    public BigDecimal commissionRateForSale() {
+    // komisyon ve aylık satış sayacı yalnızca satış temsilcisinde var; SalesRep bu üç metodu ezer
+    public BigDecimal commissionRateForSale(Branch branch) {
         return BigDecimal.ZERO;
     }
 
