@@ -15,5 +15,4 @@ import java.math.BigDecimal;
 public class ManagerResponseDto extends EmployeeResponseDto {
 
     private BigDecimal maxDiscountRate;
-    private BigDecimal branchMonthlySalesTarget;
 }
